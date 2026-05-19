@@ -16,7 +16,6 @@
         button {padding:12px 24px; font-size:1.1em; margin:0 8px; border:none; border-radius:8px; cursor:pointer;}
         .save-btn {background:#22c55e; color:white;}
         .reset-btn {background:#ef4444; color:white;}
-        .status {padding:10px; margin:10px 0; border-radius:8px; background:#f0f9ff;}
     </style>
 </head>
 <body>
@@ -31,14 +30,13 @@
                 <button class="save-btn" onclick="saveProgress()">💾 SAVE ALL CHANGES</button>
                 <button class="reset-btn" onclick="resetToDefault()">🔄 Reset to Initial Data</button>
             </div>
-            <div id="status" class="status"></div>
 
             <h2>🏆 Class Leaderboard</h2>
-            <div id="leaderboard">Loading...</div>
+            <div id="leaderboard">Loading data...</div>
 
-            <h2>📋 Progress Table</h2>
-            <div class="table-wrapper" style="overflow-x:auto; border:1px solid #ddd; border-radius:8px;">
-                <table id="progress-table">
+            <h2>📋 Progress Table (Scroll horizontally)</h2>
+            <div style="overflow-x:auto; border:1px solid #ddd; border-radius:8px;">
+                <table id="progress-table" style="width:100%; min-width:1600px; border-collapse:collapse;">
                     <thead id="table-header"></thead>
                     <tbody id="table-body"></tbody>
                 </table>
@@ -64,7 +62,7 @@
 
         let students = [];
 
-        const defaultStudents = [ /* full array - same as before */ 
+        const defaultStudents = [ /* your students */ 
             { name: "James Benner", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":0, "T85 Spec Gravity":1, "T335 Fracture":0, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":0, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":0, "T121 Density":1, "T152 Air Content":0, "R100 Cylinders":1 }},
             { name: "Joshua Christensen", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":1, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":1, "T152 Air Content":1, "R100 Cylinders":1 }},
             { name: "Mfundo Dlamini", tests: { "R90 Sampling":1, "R76 Reducing":0, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":0, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":0, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":0, "T152 Air Content":1, "R100 Cylinders":1 }},
@@ -76,26 +74,24 @@
         ];
 
         function calculatePercent(s) {
-            return Math.round(Object.values(s.tests).filter(v => v===1).length / testOrder.length * 100);
+            return Math.round(Object.values(s.tests).filter(v => v === 1).length / testOrder.length * 100);
         }
 
         function renderAll() {
             // Leaderboard
             const sorted = [...students].sort((a,b) => calculatePercent(b) - calculatePercent(a));
-            let lb = '';
+            let html = '';
             sorted.forEach((s,i) => {
                 const pct = calculatePercent(s);
-                const rank = i===0?'🏆 ':i===1?'🥇 ':i===2?'🥈 ':i===3?'🥉 ':'';
-                lb += `<div style="background:#f8fafc;padding:18px;border-radius:12px;margin-bottom:12px;">
-                    <div style="display:flex;justify-content:space-between;"><strong>${rank}${s.name}</strong><strong>${pct}%</strong></div>
-                    <div style="height:38px;background:#e2e8f0;border-radius:999px;overflow:hidden;margin-top:8px;">
-                        <div class="progress-bar" style="width:${pct}%">${pct}%</div>
-                    </div>
+                const rank = i===0 ? '🏆 ' : i===1 ? '🥇 ' : i===2 ? '🥈 ' : i===3 ? '🥉 ' : '';
+                html += `<div style="background:#f8fafc; padding:18px; border-radius:12px; margin-bottom:12px;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><strong>${rank}${s.name}</strong><strong>${pct}%</strong></div>
+                    <div style="height:38px;background:#e2e8f0;border-radius:999px;overflow:hidden;"><div class="progress-bar" style="width:${pct}%">${pct}%</div></div>
                 </div>`;
             });
-            document.getElementById('leaderboard').innerHTML = lb;
+            document.getElementById('leaderboard').innerHTML = html || 'No data loaded yet.';
 
-            // Table (same as before)
+            // Table
             let header = `<tr><th>Student</th>`;
             testOrder.forEach(t => header += `<th>${t}</th>`);
             header += `</tr>`;
@@ -106,41 +102,41 @@
                 body += `<tr><td class="student-name">${s.name}</td>`;
                 testOrder.forEach(t => {
                     const checked = s.tests[t] ? 'checked' : '';
-                    body += `<td><label class="toggle"><input type="checkbox" ${checked} onchange="toggleTest(${i},'${t}',this.checked)"><span class="slider"></span></label></td>`;
+                    body += `<td><label class="toggle"><input type="checkbox" ${checked} onchange="toggleTest(${i}, '${t}', this.checked)"><span class="slider"></span></label></td>`;
                 });
                 body += `</tr>`;
             });
             document.getElementById('table-body').innerHTML = body;
         }
 
-        window.toggleTest = (i, test, val) => {
+        window.toggleTest = function(i, test, val) {
             students[i].tests[test] = val ? 1 : 0;
             renderAll();
         };
 
-        window.saveProgress = () => {
-            progressRef.set(students).then(() => {
-                document.getElementById('status').innerHTML = "✅ Saved successfully!";
-            });
+        window.saveProgress = function() {
+            progressRef.set(students).then(() => alert("✅ Saved!")).catch(e => alert("Save failed: " + e.message));
         };
 
-        window.resetToDefault = () => {
-            if (confirm("Reset all data?")) {
+        window.resetToDefault = function() {
+            if (confirm("Reset to initial data?")) {
                 students = JSON.parse(JSON.stringify(defaultStudents));
                 renderAll();
                 saveProgress();
             }
         };
 
-        // Main load
+        // Force load default data first, then try Firebase
+        students = JSON.parse(JSON.stringify(defaultStudents));
+        renderAll();
+
+        // Try to load from Firebase
         progressRef.once('value', (snap) => {
             const data = snap.val();
-            if (data && data.length) {
+            if (data && data.length > 0) {
                 students = data;
-            } else {
-                students = JSON.parse(JSON.stringify(defaultStudents));
+                renderAll();
             }
-            renderAll();
         });
     </script>
 </body>
