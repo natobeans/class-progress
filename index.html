@@ -9,116 +9,36 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
         
-        body {
-            font-family: 'Roboto', Arial, sans-serif;
-            background: linear-gradient(135deg, #f0f4f8, #e0e9f2);
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
-            overflow: hidden;
-        }
-        header {
-            background: linear-gradient(90deg, #1e3a8a, #3b82f6);
-            color: white;
-            padding: 40px 20px;
-            text-align: center;
-        }
-        h1 { margin: 0; font-size: 2.5em; }
-        .subtitle { font-size: 1.25em; margin: 12px 0 0; }
+        body {font-family: 'Roboto', Arial, sans-serif; background: linear-gradient(135deg, #f0f4f8, #e0e9f2); margin:0; padding:20px; color:#333;}
+        .container {max-width:1400px; margin:0 auto; background:white; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,0.12); overflow:hidden;}
+        header {background:linear-gradient(90deg,#1e3a8a,#3b82f6); color:white; padding:40px 20px; text-align:center;}
+        h1 {margin:0; font-size:2.5em;}
+        .subtitle {font-size:1.25em; margin:12px 0 0;}
 
-        .content { padding: 30px; }
+        .content {padding:30px;}
+        .table-wrapper {overflow-x:auto; border:1px solid #e2e8f0; border-radius:12px; margin-bottom:30px;}
 
-        .table-wrapper {
-            overflow-x: auto;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            margin-bottom: 30px;
-        }
+        table {width:100%; min-width:1600px; border-collapse:collapse; background:white;}
+        th, td {padding:12px 10px; text-align:center; border:1px solid #e2e8f0; white-space:nowrap;}
+        th {background:#1e40af; color:white; cursor:pointer;}
+        th:hover {background:#2563eb;}
+        .student-name {text-align:left; font-weight:500; background:#f8fafc; position:sticky; left:0; z-index:9; min-width:180px;}
 
-        table {
-            width: 100%;
-            min-width: 1600px;
-            border-collapse: collapse;
-            background: white;
-        }
-        th, td {
-            padding: 12px 10px;
-            text-align: center;
-            border: 1px solid #e2e8f0;
-            white-space: nowrap;
-        }
-        th {
-            background: #1e40af;
-            color: white;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            cursor: pointer;
-        }
-        th:hover { background: #2563eb; }
-        .student-name {
-            text-align: left;
-            font-weight: 500;
-            background: #f8fafc;
-            position: sticky;
-            left: 0;
-            z-index: 9;
-            min-width: 180px;
-        }
+        .toggle {position:relative; display:inline-block; width:52px; height:28px;}
+        .toggle input {opacity:0; width:0; height:0;}
+        .slider {position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#ccc; transition:.4s; border-radius:999px;}
+        .slider:before {position:absolute; content:""; height:22px; width:22px; left:3px; bottom:3px; background:white; transition:.4s; border-radius:50%;}
+        input:checked + .slider {background:#22c55e;}
+        input:checked + .slider:before {transform:translateX(24px);}
 
-        .toggle {
-            position: relative;
-            display: inline-block;
-            width: 52px;
-            height: 28px;
-        }
-        .toggle input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: #ccc;
-            transition: .4s;
-            border-radius: 999px;
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 22px;
-            width: 22px;
-            left: 3px;
-            bottom: 3px;
-            background: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-        input:checked + .slider { background: #22c55e; }
-        input:checked + .slider:before { transform: translateX(24px); }
-
-        .progress-bar {
-            height: 38px;
-            background: linear-gradient(90deg, #22c55e, #86efac);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            border-radius: 9999px;
-        }
+        .progress-bar {height:38px; background:linear-gradient(90deg,#22c55e,#86efac); display:flex; align-items:center; justify-content:center; color:white; font-weight:700; border-radius:9999px;}
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>🧪 CE 210 Materials Lab</h1>
-            <p class="subtitle">Live Shared WAQTC Progress Tracker • Everyone sees updates in real-time</p>
+            <p class="subtitle">Live Shared WAQTC Progress Tracker • Real-time Updates</p>
         </header>
 
         <div class="content">
@@ -136,7 +56,6 @@
     </div>
 
     <script>
-        // ================== YOUR FIREBASE CONFIG ==================
         const firebaseConfig = {
             apiKey: "AIzaSyApz5GMmNmdSfdnzccx6tLlv-OCs8J4apg",
             authDomain: "ce210-progress.firebaseapp.com",
@@ -147,7 +66,6 @@
             appId: "1:758989109332:web:cea35e5fdad138398795c1",
             measurementId: "G-TJ92QXCZVJ"
         };
-        // =========================================================
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -166,7 +84,7 @@
             { name: "Zee Vieira Fernandes", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":0, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":1, "T265 Soil Moisture":0, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":1, "T152 Air Content":1, "R100 Cylinders":1 }}
         ];
 
-        // Real-time listener
+        // Real-time sync from Firebase
         progressRef.on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) students = data;
@@ -190,7 +108,9 @@
                 const rank = i===0 ? '🏆 ' : i===1 ? '🥇 ' : i===2 ? '🥈 ' : i===3 ? '🥉 ' : '';
                 html += `<div style="background:#f8fafc; padding:18px; border-radius:12px; margin-bottom:12px;">
                     <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><strong>${rank}${s.name}</strong><strong>${pct}%</strong></div>
-                    <div style="height:38px; background:#e2e8f0; border-radius:999px; overflow:hidden;"><div class="progress-bar" style="width:${pct}%">${pct}%</div></div>
+                    <div style="height:38px; background:#e2e8f0; border-radius:999px; overflow:hidden;">
+                        <div class="progress-bar" style="width:${pct}%">${pct}%</div>
+                    </div>
                 </div>`;
             });
             document.getElementById('leaderboard').innerHTML = html;
@@ -224,7 +144,8 @@
 
         window.toggleTest = function(studentIndex, testName, newValue) {
             students[studentIndex].tests[testName] = newValue ? 1 : 0;
-            saveProgress();
+            renderAll();        // Immediate update
+            saveProgress();     // Save to Firebase for others
         };
 
         function renderAll() {
@@ -232,7 +153,7 @@
             renderTable();
         }
 
-        // Initial render
+        // Initial load
         renderAll();
     </script>
 </body>
