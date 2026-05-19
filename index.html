@@ -52,7 +52,7 @@
             </div>
 
             <h2>🏆 Class Leaderboard (Live)</h2>
-            <div id="leaderboard"></div>
+            <div id="leaderboard">Loading data from database...</div>
 
             <h2>📋 Shared Progress Table (Scroll horizontally →)</h2>
             <div class="table-wrapper">
@@ -99,6 +99,7 @@
         }
 
         function renderAll() {
+            // Leaderboard
             const sorted = [...students].sort((a,b) => calculatePercent(b) - calculatePercent(a));
             let html = '';
             sorted.forEach((s,i) => {
@@ -109,23 +110,26 @@
                     <div style="height:38px;background:#e2e8f0;border-radius:999px;overflow:hidden;"><div class="progress-bar" style="width:${pct}%">${pct}%</div></div>
                 </div>`;
             });
-            document.getElementById('leaderboard').innerHTML = html;
+            document.getElementById('leaderboard').innerHTML = html || '<p style="text-align:center;color:#666;">No data yet. Click "Reset to Initial Data" to start.</p>';
 
-            let header = `<tr><th>Student</th>`;
-            testOrder.forEach(t => header += `<th onclick="window.open('https://www.waqtc.org/technician-resources/', '_blank')">${t}</th>`);
-            header += `</tr>`;
-            document.getElementById('table-header').innerHTML = header;
+            // Table
+            let headerHTML = `<tr><th>Student</th>`;
+            testOrder.forEach(test => {
+                headerHTML += `<th onclick="window.open('https://www.waqtc.org/technician-resources/', '_blank')">${test}</th>`;
+            });
+            headerHTML += `</tr>`;
+            document.getElementById('table-header').innerHTML = headerHTML;
 
-            let body = '';
+            let bodyHTML = '';
             students.forEach((student, i) => {
-                body += `<tr><td class="student-name">${student.name}</td>`;
+                bodyHTML += `<tr><td class="student-name">${student.name}</td>`;
                 testOrder.forEach(test => {
                     const checked = student.tests[test] ? 'checked' : '';
-                    body += `<td><label class="toggle"><input type="checkbox" ${checked} onchange="toggleTest(${i}, '${test}', this.checked)"><span class="slider"></span></label></td>`;
+                    bodyHTML += `<td><label class="toggle"><input type="checkbox" ${checked} onchange="toggleTest(${i}, '${test}', this.checked)"><span class="slider"></span></label></td>`;
                 });
-                body += `</tr>`;
+                bodyHTML += `</tr>`;
             });
-            document.getElementById('table-body').innerHTML = body;
+            document.getElementById('table-body').innerHTML = bodyHTML;
         }
 
         window.toggleTest = function(i, test, val) {
@@ -134,29 +138,32 @@
         };
 
         window.saveProgress = function() {
-            progressRef.set(students).then(() => alert("✅ Saved successfully!")).catch(e => alert("Error: " + e.message));
+            progressRef.set(students).then(() => alert("✅ Saved successfully!")).catch(e => alert("Error saving: " + e.message));
         };
 
         window.resetToDefault = function() {
-            if (confirm("Reset everything to initial data?")) {
+            if (confirm("Reset all data to initial values?")) {
                 students = JSON.parse(JSON.stringify(defaultStudents));
                 renderAll();
                 saveProgress();
             }
         };
 
-        // Load data
-        progressRef.once('value', (snap) => {
-            const data = snap.val();
-            if (data) students = data;
-            else students = JSON.parse(JSON.stringify(defaultStudents));
+        // Load data from Firebase
+        progressRef.once('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.length > 0) {
+                students = data;
+            } else {
+                students = JSON.parse(JSON.stringify(defaultStudents));
+            }
             renderAll();
         });
 
-        // Real-time updates
-        progressRef.on('value', (snap) => {
-            const data = snap.val();
-            if (data) {
+        // Real-time listener
+        progressRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.length > 0) {
                 students = data;
                 renderAll();
             }
