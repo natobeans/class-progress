@@ -1,40 +1,193 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>CE 101 Progress</title>
-  <style>
-    body {
-      font-family: Arial;
-      margin: 40px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CE 210 - WAQTC Progress Tracker</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+        
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background: linear-gradient(135deg, #f0f4f8, #e0e9f2);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        h1 { margin: 0; font-size: 2.5em; }
+        .subtitle { font-size: 1.25em; margin: 12px 0 0; opacity: 0.95; }
 
-    h1 {
-      color: darkblue;
-    }
+        .content { padding: 30px; }
 
-    .student {
-      margin-bottom: 10px;
-      padding: 10px;
-      border: 1px solid #ccc;
-    }
-  </style>
+        h2 {
+            color: #1e40af;
+            margin: 40px 0 20px;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 12px;
+        }
+
+        .card {
+            background: #f8fafc;
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 28px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.07);
+        }
+
+        .student-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .progress-container {
+            height: 38px;
+            background: #e2e8f0;
+            border-radius: 9999px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #22c55e, #86efac);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.15em;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #1e40af;
+            color: white;
+        }
+        .passed { background: #86efac !important; color: #166534; font-weight: bold; text-align: center; }
+        .pending { background: #fda4af !important; color: #991b1b; text-align: center; }
+    </style>
 </head>
-
 <body>
+    <div class="container">
+        <header>
+            <h1>🧪 CE 210 Materials Lab</h1>
+            <p class="subtitle">WAQTC Progress Tracker • Aggregate • Embankment & Base • Concrete</p>
+            <p style="margin-top:15px; font-size:1.1em;">Track your progress • Compete with the class • Finish strong!</p>
+        </header>
 
-<h1>CE 101 Student Progress</h1>
+        <div class="content">
+            <h2>🏆 Class Leaderboard (Sorted by % Complete)</h2>
+            <div id="leaderboard"></div>
 
-<div class="student">
-  Aaron - 85%
-</div>
+            <h2>📋 All Students Detailed Progress</h2>
+            <div id="all-students"></div>
+        </div>
+    </div>
 
-<div class="student">
-  Jake - 92%
-</div>
+    <script>
+        const students = [
+            { name: "James Benner", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":0, "T85 Spec Gravity":1, "T335 Fracture":0, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":0, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":0, "T121 Density":1, "T152 Air Content":0, "R100 Cylinders":1 }},
+            { name: "Joshua Christensen", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":1, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":1, "T152 Air Content":1, "R100 Cylinders":1 }},
+            { name: "Mfundo Dlamini", tests: { "R90 Sampling":1, "R76 Reducing":0, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":0, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":0, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":0, "T152 Air Content":1, "R100 Cylinders":1 }},
+            { name: "Abbey Eichmann", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":0, "T99/T180 Proctor":1, "R75 Family Curves":1, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":0, "T119 Slump":1, "T121 Density":1, "T152 Air Content":1, "R100 Cylinders":1 }},
+            { name: "Eduarda Iunes", tests: { "R90 Sampling":0, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":0, "R75 Family Curves":1, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":1, "T152 Air Content":0, "R100 Cylinders":1 }},
+            { name: "Ammon Obbanya", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":0, "T255 Moisture":1, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":1, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":1, "T152 Air Content":1, "R100 Cylinders":0 }},
+            { name: "Gadiel Perez", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":1, "T335 Fracture":0, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":0, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":0, "T121 Density":1, "T152 Air Content":1, "R100 Cylinders":1 }},
+            { name: "Zee Vieira Fernandes", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":0, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":1, "T265 Soil Moisture":0, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":1, "T152 Air Content":1, "R100 Cylinders":1 }}
+        ];
 
-<div class="student">
-  Emily - 78%
-</div>
+        const testOrder = [
+            "R90 Sampling", "R76 Reducing", "T27/T11 Gradation", "T255 Moisture",
+            "T85 Spec Gravity", "T335 Fracture", "T176 Sand Eq",
+            "T99/T180 Proctor", "R75 Family Curves", "T265 Soil Moisture",
+            "TM2 Sampling", "T309 Temp", "T119 Slump", "T121 Density",
+            "T152 Air Content", "R100 Cylinders"
+        ];
 
+        // Calculate percentages
+        students.forEach(s => {
+            const passed = Object.values(s.tests).filter(v => v === 1).length;
+            s.percent = Math.round((passed / testOrder.length) * 100);
+        });
+
+        // Render Leaderboard
+        function renderLeaderboard() {
+            const sorted = [...students].sort((a, b) => b.percent - a.percent);
+            let html = '';
+            sorted.forEach((s, i) => {
+                const rank = i === 0 ? '🏆' : i === 1 ? '🥇' : i === 2 ? '🥈' : i === 3 ? '🥉' : '';
+                html += `
+                <div class="card">
+                    <div class="student-header">
+                        <strong>${rank} ${s.name}</strong>
+                        <strong>${s.percent}%</strong>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: ${s.percent}%">${s.percent}%</div>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('leaderboard').innerHTML = html;
+        }
+
+        // Render Detailed Progress
+        function renderDetailed() {
+            let html = '';
+            students.forEach(s => {
+                html += `
+                <div class="card">
+                    <div class="student-header">
+                        <strong>${s.name}</strong>
+                        <strong>${s.percent}% Complete</strong>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: ${s.percent}%">${s.percent}%</div>
+                    </div>
+                    <table>
+                        <thead><tr><th>Test</th><th>Status</th></tr></thead>
+                        <tbody>`;
+                
+                testOrder.forEach(test => {
+                    const passed = s.tests[test];
+                    html += `<tr>
+                        <td>${test}</td>
+                        <td class="${passed ? 'passed' : 'pending'}">${passed ? '✅ PASSED' : '❌ Pending'}</td>
+                    </tr>`;
+                });
+                
+                html += `</tbody></table></div>`;
+            });
+            document.getElementById('all-students').innerHTML = html;
+        }
+
+        renderLeaderboard();
+        renderDetailed();
+    </script>
 </body>
 </html>
