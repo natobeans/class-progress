@@ -7,15 +7,62 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        body {font-family: Arial, sans-serif; margin:20px;}
-        .status {padding:10px; margin:10px 0; border-radius:8px; font-weight:bold;}
-        .success {background:#d4edda; color:#155724;}
-        .error {background:#f8d7da; color:#721c24;}
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+        
+        body {font-family: 'Roboto', Arial, sans-serif; background: linear-gradient(135deg, #f0f4f8, #e0e9f2); margin:0; padding:20px; color:#333;}
+        .container {max-width:1400px; margin:0 auto; background:white; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,0.12); overflow:hidden;}
+        header {background:linear-gradient(90deg,#1e3a8a,#3b82f6); color:white; padding:40px 20px; text-align:center;}
+        h1 {margin:0; font-size:2.5em;}
+        .subtitle {font-size:1.25em; margin:12px 0 0;}
+
+        .content {padding:30px;}
+        .controls {text-align:center; margin:20px 0;}
+        button {padding:12px 24px; font-size:1.1em; margin:0 8px; border:none; border-radius:8px; cursor:pointer;}
+        .save-btn {background:#22c55e; color:white;}
+        .reset-btn {background:#ef4444; color:white;}
+
+        .table-wrapper {overflow-x:auto; border:1px solid #e2e8f0; border-radius:12px; margin-bottom:30px;}
+        table {width:100%; min-width:1600px; border-collapse:collapse; background:white;}
+        th, td {padding:12px 10px; text-align:center; border:1px solid #e2e8f0; white-space:nowrap;}
+        th {background:#1e40af; color:white; cursor:pointer;}
+        th:hover {background:#2563eb;}
+        .student-name {text-align:left; font-weight:500; background:#f8fafc; position:sticky; left:0; z-index:9; min-width:180px;}
+
+        .toggle {position:relative; display:inline-block; width:52px; height:28px;}
+        .toggle input {opacity:0; width:0; height:0;}
+        .slider {position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#ccc; transition:.4s; border-radius:999px;}
+        .slider:before {position:absolute; content:""; height:22px; width:22px; left:3px; bottom:3px; background:white; transition:.4s; border-radius:50%;}
+        input:checked + .slider {background:#22c55e;}
+        input:checked + .slider:before {transform:translateX(24px);}
+
+        .progress-bar {height:38px; background:linear-gradient(90deg,#22c55e,#86efac); display:flex; align-items:center; justify-content:center; color:white; font-weight:700; border-radius:9999px;}
     </style>
 </head>
 <body>
-    <h1>🔍 Firebase Debug Mode</h1>
-    <div id="status"></div>
+    <div class="container">
+        <header>
+            <h1>🧪 CE 210 Materials Lab</h1>
+            <p class="subtitle">Live Shared WAQTC Progress Tracker</p>
+        </header>
+
+        <div class="content">
+            <div class="controls">
+                <button class="save-btn" onclick="saveProgress()">💾 SAVE ALL CHANGES TO DATABASE</button>
+                <button class="reset-btn" onclick="resetToDefault()">🔄 Reset to Initial Data</button>
+            </div>
+
+            <h2>🏆 Class Leaderboard (Live)</h2>
+            <div id="leaderboard"></div>
+
+            <h2>📋 Shared Progress Table (Scroll horizontally →)</h2>
+            <div class="table-wrapper">
+                <table id="progress-table">
+                    <thead id="table-header"></thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
     <script>
         const firebaseConfig = {
@@ -29,35 +76,91 @@
         };
 
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const progressRef = db.ref('ce210Progress');
+        const progressRef = firebase.database().ref('ce210Progress');
 
-        const statusDiv = document.getElementById('status');
+        const testOrder = ["R90 Sampling","R76 Reducing","T27/T11 Gradation","T255 Moisture","T85 Spec Gravity","T335 Fracture","T176 Sand Eq","T99/T180 Proctor","R75 Family Curves","T265 Soil Moisture","TM2 Sampling","T309 Temp","T119 Slump","T121 Density","T152 Air Content","R100 Cylinders"];
 
-        statusDiv.innerHTML += `<div class="status success">✅ Firebase Connected Successfully!</div>`;
+        let students = [];
 
-        // Try to read data
-        progressRef.once('value')
-            .then((snapshot) => {
-                const data = snapshot.val();
-                statusDiv.innerHTML += `<div class="status success">✅ Successfully read from Database<br>Current records: ${data ? data.length : 0}</div>`;
-                console.log("Firebase Data:", data);
-            })
-            .catch((error) => {
-                statusDiv.innerHTML += `<div class="status error">❌ Error reading from Database: ${error.message}</div>`;
-                console.error(error);
+        const defaultStudents = [
+            { name: "James Benner", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":0, "T85 Spec Gravity":1, "T335 Fracture":0, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":0, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":0, "T121 Density":1, "T152 Air Content":0, "R100 Cylinders":1 }},
+            { name: "Joshua Christensen", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":1, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":1, "T152 Air Content":1, "R100 Cylinders":1 }},
+            { name: "Mfundo Dlamini", tests: { "R90 Sampling":1, "R76 Reducing":0, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":0, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":0, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":0, "T152 Air Content":1, "R100 Cylinders":1 }},
+            { name: "Abbey Eichmann", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":0, "T99/T180 Proctor":1, "R75 Family Curves":1, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":0, "T119 Slump":1, "T121 Density":1, "T152 Air Content":1, "R100 Cylinders":1 }},
+            { name: "Eduarda Iunes", tests: { "R90 Sampling":0, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":0, "R75 Family Curves":1, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":1, "T152 Air Content":0, "R100 Cylinders":1 }},
+            { name: "Ammon Obbanya", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":0, "T255 Moisture":1, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":1, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":1, "T152 Air Content":1, "R100 Cylinders":0 }},
+            { name: "Gadiel Perez", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":1, "T335 Fracture":0, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":0, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":0, "T121 Density":1, "T152 Air Content":1, "R100 Cylinders":1 }},
+            { name: "Zee Vieira Fernandes", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":0, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":1, "T265 Soil Moisture":0, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":1, "T152 Air Content":1, "R100 Cylinders":1 }}
+        ];
+
+        function calculatePercent(student) {
+            const passed = Object.values(student.tests).filter(v => v === 1).length;
+            return Math.round((passed / testOrder.length) * 100);
+        }
+
+        function renderAll() {
+            const sorted = [...students].sort((a,b) => calculatePercent(b) - calculatePercent(a));
+            let html = '';
+            sorted.forEach((s,i) => {
+                const pct = calculatePercent(s);
+                const rank = i===0 ? '🏆 ' : i===1 ? '🥇 ' : i===2 ? '🥈 ' : i===3 ? '🥉 ' : '';
+                html += `<div style="background:#f8fafc;padding:18px;border-radius:12px;margin-bottom:12px;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><strong>${rank}${s.name}</strong><strong>${pct}%</strong></div>
+                    <div style="height:38px;background:#e2e8f0;border-radius:999px;overflow:hidden;"><div class="progress-bar" style="width:${pct}%">${pct}%</div></div>
+                </div>`;
             });
+            document.getElementById('leaderboard').innerHTML = html;
 
-        // Test writing
-        window.testSave = function() {
-            progressRef.set([{name: "Test Student", tests: {}}]).then(() => {
-                statusDiv.innerHTML += `<div class="status success">✅ Test write successful!</div>`;
-            }).catch(err => {
-                statusDiv.innerHTML += `<div class="status error">❌ Write failed: ${err.message}</div>`;
+            let header = `<tr><th>Student</th>`;
+            testOrder.forEach(t => header += `<th onclick="window.open('https://www.waqtc.org/technician-resources/', '_blank')">${t}</th>`);
+            header += `</tr>`;
+            document.getElementById('table-header').innerHTML = header;
+
+            let body = '';
+            students.forEach((student, i) => {
+                body += `<tr><td class="student-name">${student.name}</td>`;
+                testOrder.forEach(test => {
+                    const checked = student.tests[test] ? 'checked' : '';
+                    body += `<td><label class="toggle"><input type="checkbox" ${checked} onchange="toggleTest(${i}, '${test}', this.checked)"><span class="slider"></span></label></td>`;
+                });
+                body += `</tr>`;
             });
+            document.getElementById('table-body').innerHTML = body;
+        }
+
+        window.toggleTest = function(i, test, val) {
+            students[i].tests[test] = val ? 1 : 0;
+            renderAll();
         };
-    </script>
 
-    <button onclick="testSave()" style="padding:15px 25px; font-size:1.1em;">Test Save to Firebase</button>
+        window.saveProgress = function() {
+            progressRef.set(students).then(() => alert("✅ Saved successfully!")).catch(e => alert("Error: " + e.message));
+        };
+
+        window.resetToDefault = function() {
+            if (confirm("Reset everything to initial data?")) {
+                students = JSON.parse(JSON.stringify(defaultStudents));
+                renderAll();
+                saveProgress();
+            }
+        };
+
+        // Load data
+        progressRef.once('value', (snap) => {
+            const data = snap.val();
+            if (data) students = data;
+            else students = JSON.parse(JSON.stringify(defaultStudents));
+            renderAll();
+        });
+
+        // Real-time updates
+        progressRef.on('value', (snap) => {
+            const data = snap.val();
+            if (data) {
+                students = data;
+                renderAll();
+            }
+        });
+    </script>
 </body>
 </html>
