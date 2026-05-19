@@ -6,41 +6,119 @@
     <title>CE 210 - WAQTC Progress Tracker</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
-        body {font-family: 'Roboto', Arial, sans-serif; background: linear-gradient(135deg, #f0f4f8, #e0e9f2); margin:0; padding:20px; color:#333;}
-        .container {max-width:1200px; margin:0 auto; background:white; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,0.12); overflow:hidden;}
-        header {background:linear-gradient(90deg,#1e3a8a,#3b82f6); color:white; padding:40px 20px; text-align:center;}
-        h1 {margin:0; font-size:2.5em;}
-        .subtitle {font-size:1.25em; margin:12px 0 0;}
-        .content {padding:30px;}
-        h2 {color:#1e40af; margin:40px 0 20px; border-bottom:3px solid #3b82f6; padding-bottom:12px;}
-        .card {background:#f8fafc; border-radius:14px; padding:22px; margin-bottom:28px; box-shadow:0 5px 15px rgba(0,0,0,0.07);}
-        .progress-container {height:38px; background:#e2e8f0; border-radius:9999px; overflow:hidden; margin:15px 0;}
-        .progress-bar {height:100%; background:linear-gradient(90deg,#22c55e,#86efac); display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:1.15em;}
-        table {width:100%; border-collapse:collapse;}
-        th, td {padding:12px 10px; border-bottom:1px solid #ddd;}
-        th {background:#1e40af; color:white;}
-        .toggle {position:relative; display:inline-block; width:52px; height:28px;}
-        .toggle input {opacity:0; width:0; height:0;}
-        .slider {position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#ccc; transition:.4s; border-radius:999px;}
-        .slider:before {position:absolute; content:""; height:22px; width:22px; left:3px; bottom:3px; background:white; transition:.4s; border-radius:50%;}
-        input:checked + .slider {background:#22c55e;}
-        input:checked + .slider:before {transform:translateX(24px);}
+        
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background: linear-gradient(135deg, #f0f4f8, #e0e9f2);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        h1 { margin: 0; font-size: 2.5em; }
+        .subtitle { font-size: 1.25em; margin: 12px 0 0; }
+
+        .content { padding: 30px; }
+
+        h2 { color: #1e40af; margin: 35px 0 20px; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        th, td {
+            padding: 12px 8px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        th {
+            background: #1e40af;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            font-weight: 500;
+        }
+        .student-name {
+            text-align: left;
+            font-weight: 500;
+            background: #f8fafc;
+            position: sticky;
+            left: 0;
+            z-index: 9;
+        }
+
+        .toggle {
+            position: relative;
+            display: inline-block;
+            width: 52px;
+            height: 28px;
+        }
+        .toggle input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #ccc;
+            transition: .4s;
+            border-radius: 999px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background: #22c55e; }
+        input:checked + .slider:before { transform: translateX(24px); }
+
+        .progress-bar {
+            height: 38px;
+            background: linear-gradient(90deg, #22c55e, #86efac);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            border-radius: 9999px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>🧪 CE 210 Materials Lab</h1>
-            <p class="subtitle">WAQTC Progress Tracker • Live Updates Enabled</p>
-            <p style="margin-top:15px;">Click any toggle to update progress • Changes are saved automatically</p>
+            <p class="subtitle">WAQTC Progress Tracker • Click toggles to update live</p>
         </header>
 
         <div class="content">
             <h2>🏆 Class Leaderboard (Live)</h2>
             <div id="leaderboard"></div>
 
-            <h2>📋 All Students - Click to Update</h2>
-            <div id="all-students"></div>
+            <h2>📋 Full Progress Table - Click Any Toggle to Update</h2>
+            <table id="progress-table">
+                <thead id="table-header"></thead>
+                <tbody id="table-body"></tbody>
+            </table>
         </div>
     </div>
 
@@ -48,7 +126,6 @@
         let students = [
             { name: "James Benner", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":0, "T85 Spec Gravity":1, "T335 Fracture":0, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":0, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":0, "T121 Density":1, "T152 Air Content":0, "R100 Cylinders":1 }},
             { name: "Joshua Christensen", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":1, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":1, "T152 Air Content":1, "R100 Cylinders":1 }},
-            // ... (all 8 students - full list below)
             { name: "Mfundo Dlamini", tests: { "R90 Sampling":1, "R76 Reducing":0, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":0, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":0, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":0, "T152 Air Content":1, "R100 Cylinders":1 }},
             { name: "Abbey Eichmann", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":0, "T99/T180 Proctor":1, "R75 Family Curves":1, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":0, "T119 Slump":1, "T121 Density":1, "T152 Air Content":1, "R100 Cylinders":1 }},
             { name: "Eduarda Iunes", tests: { "R90 Sampling":0, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":0, "R75 Family Curves":1, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":1, "T152 Air Content":0, "R100 Cylinders":1 }},
@@ -59,7 +136,7 @@
 
         const testOrder = ["R90 Sampling","R76 Reducing","T27/T11 Gradation","T255 Moisture","T85 Spec Gravity","T335 Fracture","T176 Sand Eq","T99/T180 Proctor","R75 Family Curves","T265 Soil Moisture","TM2 Sampling","T309 Temp","T119 Slump","T121 Density","T152 Air Content","R100 Cylinders"];
 
-        // Load from localStorage or use default
+        // Load saved data
         if (localStorage.getItem('ce210Progress')) {
             students = JSON.parse(localStorage.getItem('ce210Progress'));
         }
@@ -73,47 +150,63 @@
             return Math.round((passed / testOrder.length) * 100);
         }
 
-        function renderAll() {
-            // Leaderboard
+        function renderLeaderboard() {
             const sorted = [...students].sort((a,b) => calculatePercent(b) - calculatePercent(a));
-            let lbHTML = '';
+            let html = '';
             sorted.forEach((s,i) => {
                 const pct = calculatePercent(s);
-                const rank = i===0?'🏆':i===1?'🥇':i===2?'🥈':i===3?'🥉':'';
-                lbHTML += `<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:12px;"><strong>${rank} ${s.name}</strong><strong>${pct}%</strong></div><div class="progress-container"><div class="progress-bar" style="width:${pct}%">${pct}%</div></div></div>`;
+                const rank = i===0 ? '🏆 ' : i===1 ? '🥇 ' : i===2 ? '🥈 ' : i===3 ? '🥉 ' : '';
+                html += `<div style="background:#f8fafc; padding:18px; border-radius:12px; margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <strong>${rank}${s.name}</strong>
+                        <strong>${pct}%</strong>
+                    </div>
+                    <div style="height:38px; background:#e2e8f0; border-radius:999px; overflow:hidden;">
+                        <div class="progress-bar" style="width:${pct}%">${pct}%</div>
+                    </div>
+                </div>`;
             });
-            document.getElementById('leaderboard').innerHTML = lbHTML;
+            document.getElementById('leaderboard').innerHTML = html;
+        }
 
-            // Detailed with toggles
-            let detailHTML = '';
-            students.forEach((s, studentIndex) => {
-                detailHTML += `<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:12px;"><strong>${s.name}</strong><strong>${calculatePercent(s)}%</strong></div><div class="progress-container"><div class="progress-bar" style="width:${calculatePercent(s)}%">${calculatePercent(s)}%</div></div><table>`;
-                testOrder.forEach((test, testIndex) => {
-                    const isPassed = s.tests[test];
-                    detailHTML += `<tr>
-                        <td>${test}</td>
-                        <td style="text-align:center;">
-                            <label class="toggle">
-                                <input type="checkbox" ${isPassed ? 'checked' : ''} 
-                                       onchange="toggleTest(${studentIndex}, '${test}', this.checked)">
-                                <span class="slider"></span>
-                            </label>
-                        </td>
-                    </tr>`;
-                });
-                detailHTML += `</table></div>`;
+        function renderTable() {
+            // Header
+            let headerHTML = `<tr><th>Student</th>`;
+            testOrder.forEach(test => {
+                headerHTML += `<th style="min-width:110px; font-size:0.95em;">${test}</th>`;
             });
-            document.getElementById('all-students').innerHTML = detailHTML;
+            headerHTML += `</tr>`;
+            document.getElementById('table-header').innerHTML = headerHTML;
+
+            // Body
+            let bodyHTML = '';
+            students.forEach((student, studentIndex) => {
+                bodyHTML += `<tr><td class="student-name">${student.name}</td>`;
+                testOrder.forEach((test, testIndex) => {
+                    const isPassed = student.tests[test];
+                    bodyHTML += `<td>
+                        <label class="toggle">
+                            <input type="checkbox" ${isPassed ? 'checked' : ''} 
+                                   onchange="toggleTest(${studentIndex}, '${test}', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </td>`;
+                });
+                bodyHTML += `</tr>`;
+            });
+            document.getElementById('table-body').innerHTML = bodyHTML;
         }
 
         window.toggleTest = function(studentIndex, testName, newValue) {
             students[studentIndex].tests[testName] = newValue ? 1 : 0;
             saveProgress();
-            renderAll();   // Refresh everything live
+            renderLeaderboard();   // Update leaderboard live
+            // No need to re-render whole table - toggle already updated visually
         };
 
         // Initial render
-        renderAll();
+        renderLeaderboard();
+        renderTable();
     </script>
 </body>
 </html>
