@@ -6,114 +6,49 @@
     <title>CE 210 - WAQTC Progress Tracker</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
-        
-        body {
-            font-family: 'Roboto', Arial, sans-serif;
-            background: linear-gradient(135deg, #f0f4f8, #e0e9f2);
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
-            overflow: hidden;
-        }
-        header {
-            background: linear-gradient(90deg, #1e3a8a, #3b82f6);
-            color: white;
-            padding: 40px 20px;
-            text-align: center;
-        }
-        h1 { margin: 0; font-size: 2.5em; }
-        .subtitle { font-size: 1.25em; margin: 12px 0 0; opacity: 0.95; }
-
-        .content { padding: 30px; }
-
-        h2 {
-            color: #1e40af;
-            margin: 40px 0 20px;
-            border-bottom: 3px solid #3b82f6;
-            padding-bottom: 12px;
-        }
-
-        .card {
-            background: #f8fafc;
-            border-radius: 14px;
-            padding: 22px;
-            margin-bottom: 28px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.07);
-        }
-
-        .student-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 14px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .progress-container {
-            height: 38px;
-            background: #e2e8f0;
-            border-radius: 9999px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #22c55e, #86efac);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 1.15em;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.4);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 12px 10px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background: #1e40af;
-            color: white;
-        }
-        .passed { background: #86efac !important; color: #166534; font-weight: bold; text-align: center; }
-        .pending { background: #fda4af !important; color: #991b1b; text-align: center; }
+        body {font-family: 'Roboto', Arial, sans-serif; background: linear-gradient(135deg, #f0f4f8, #e0e9f2); margin:0; padding:20px; color:#333;}
+        .container {max-width:1200px; margin:0 auto; background:white; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,0.12); overflow:hidden;}
+        header {background:linear-gradient(90deg,#1e3a8a,#3b82f6); color:white; padding:40px 20px; text-align:center;}
+        h1 {margin:0; font-size:2.5em;}
+        .subtitle {font-size:1.25em; margin:12px 0 0;}
+        .content {padding:30px;}
+        h2 {color:#1e40af; margin:40px 0 20px; border-bottom:3px solid #3b82f6; padding-bottom:12px;}
+        .card {background:#f8fafc; border-radius:14px; padding:22px; margin-bottom:28px; box-shadow:0 5px 15px rgba(0,0,0,0.07);}
+        .progress-container {height:38px; background:#e2e8f0; border-radius:9999px; overflow:hidden; margin:15px 0;}
+        .progress-bar {height:100%; background:linear-gradient(90deg,#22c55e,#86efac); display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:1.15em;}
+        table {width:100%; border-collapse:collapse;}
+        th, td {padding:12px 10px; border-bottom:1px solid #ddd;}
+        th {background:#1e40af; color:white;}
+        .toggle {position:relative; display:inline-block; width:52px; height:28px;}
+        .toggle input {opacity:0; width:0; height:0;}
+        .slider {position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#ccc; transition:.4s; border-radius:999px;}
+        .slider:before {position:absolute; content:""; height:22px; width:22px; left:3px; bottom:3px; background:white; transition:.4s; border-radius:50%;}
+        input:checked + .slider {background:#22c55e;}
+        input:checked + .slider:before {transform:translateX(24px);}
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>🧪 CE 210 Materials Lab</h1>
-            <p class="subtitle">WAQTC Progress Tracker • Aggregate • Embankment & Base • Concrete</p>
-            <p style="margin-top:15px; font-size:1.1em;">Track your progress • Compete with the class • Finish strong!</p>
+            <p class="subtitle">WAQTC Progress Tracker • Live Updates Enabled</p>
+            <p style="margin-top:15px;">Click any toggle to update progress • Changes are saved automatically</p>
         </header>
 
         <div class="content">
-            <h2>🏆 Class Leaderboard (Sorted by % Complete)</h2>
+            <h2>🏆 Class Leaderboard (Live)</h2>
             <div id="leaderboard"></div>
 
-            <h2>📋 All Students Detailed Progress</h2>
+            <h2>📋 All Students - Click to Update</h2>
             <div id="all-students"></div>
         </div>
     </div>
 
     <script>
-        const students = [
+        let students = [
             { name: "James Benner", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":0, "T85 Spec Gravity":1, "T335 Fracture":0, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":0, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":0, "T121 Density":1, "T152 Air Content":0, "R100 Cylinders":1 }},
             { name: "Joshua Christensen", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":1, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":1, "T152 Air Content":1, "R100 Cylinders":1 }},
+            // ... (all 8 students - full list below)
             { name: "Mfundo Dlamini", tests: { "R90 Sampling":1, "R76 Reducing":0, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":0, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":0, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":0, "T152 Air Content":1, "R100 Cylinders":1 }},
             { name: "Abbey Eichmann", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":0, "T99/T180 Proctor":1, "R75 Family Curves":1, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":0, "T119 Slump":1, "T121 Density":1, "T152 Air Content":1, "R100 Cylinders":1 }},
             { name: "Eduarda Iunes", tests: { "R90 Sampling":0, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":0, "R75 Family Curves":1, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":1, "T152 Air Content":0, "R100 Cylinders":1 }},
@@ -122,72 +57,63 @@
             { name: "Zee Vieira Fernandes", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":0, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":1, "T265 Soil Moisture":0, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":1, "T152 Air Content":1, "R100 Cylinders":1 }}
         ];
 
-        const testOrder = [
-            "R90 Sampling", "R76 Reducing", "T27/T11 Gradation", "T255 Moisture",
-            "T85 Spec Gravity", "T335 Fracture", "T176 Sand Eq",
-            "T99/T180 Proctor", "R75 Family Curves", "T265 Soil Moisture",
-            "TM2 Sampling", "T309 Temp", "T119 Slump", "T121 Density",
-            "T152 Air Content", "R100 Cylinders"
-        ];
+        const testOrder = ["R90 Sampling","R76 Reducing","T27/T11 Gradation","T255 Moisture","T85 Spec Gravity","T335 Fracture","T176 Sand Eq","T99/T180 Proctor","R75 Family Curves","T265 Soil Moisture","TM2 Sampling","T309 Temp","T119 Slump","T121 Density","T152 Air Content","R100 Cylinders"];
 
-        // Calculate percentages
-        students.forEach(s => {
-            const passed = Object.values(s.tests).filter(v => v === 1).length;
-            s.percent = Math.round((passed / testOrder.length) * 100);
-        });
-
-        // Render Leaderboard
-        function renderLeaderboard() {
-            const sorted = [...students].sort((a, b) => b.percent - a.percent);
-            let html = '';
-            sorted.forEach((s, i) => {
-                const rank = i === 0 ? '🏆' : i === 1 ? '🥇' : i === 2 ? '🥈' : i === 3 ? '🥉' : '';
-                html += `
-                <div class="card">
-                    <div class="student-header">
-                        <strong>${rank} ${s.name}</strong>
-                        <strong>${s.percent}%</strong>
-                    </div>
-                    <div class="progress-container">
-                        <div class="progress-bar" style="width: ${s.percent}%">${s.percent}%</div>
-                    </div>
-                </div>`;
-            });
-            document.getElementById('leaderboard').innerHTML = html;
+        // Load from localStorage or use default
+        if (localStorage.getItem('ce210Progress')) {
+            students = JSON.parse(localStorage.getItem('ce210Progress'));
         }
 
-        // Render Detailed Progress
-        function renderDetailed() {
-            let html = '';
-            students.forEach(s => {
-                html += `
-                <div class="card">
-                    <div class="student-header">
-                        <strong>${s.name}</strong>
-                        <strong>${s.percent}% Complete</strong>
-                    </div>
-                    <div class="progress-container">
-                        <div class="progress-bar" style="width: ${s.percent}%">${s.percent}%</div>
-                    </div>
-                    <table>
-                        <thead><tr><th>Test</th><th>Status</th></tr></thead>
-                        <tbody>`;
-                
-                testOrder.forEach(test => {
-                    const passed = s.tests[test];
-                    html += `<tr>
+        function saveProgress() {
+            localStorage.setItem('ce210Progress', JSON.stringify(students));
+        }
+
+        function calculatePercent(student) {
+            const passed = Object.values(student.tests).filter(v => v === 1).length;
+            return Math.round((passed / testOrder.length) * 100);
+        }
+
+        function renderAll() {
+            // Leaderboard
+            const sorted = [...students].sort((a,b) => calculatePercent(b) - calculatePercent(a));
+            let lbHTML = '';
+            sorted.forEach((s,i) => {
+                const pct = calculatePercent(s);
+                const rank = i===0?'🏆':i===1?'🥇':i===2?'🥈':i===3?'🥉':'';
+                lbHTML += `<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:12px;"><strong>${rank} ${s.name}</strong><strong>${pct}%</strong></div><div class="progress-container"><div class="progress-bar" style="width:${pct}%">${pct}%</div></div></div>`;
+            });
+            document.getElementById('leaderboard').innerHTML = lbHTML;
+
+            // Detailed with toggles
+            let detailHTML = '';
+            students.forEach((s, studentIndex) => {
+                detailHTML += `<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:12px;"><strong>${s.name}</strong><strong>${calculatePercent(s)}%</strong></div><div class="progress-container"><div class="progress-bar" style="width:${calculatePercent(s)}%">${calculatePercent(s)}%</div></div><table>`;
+                testOrder.forEach((test, testIndex) => {
+                    const isPassed = s.tests[test];
+                    detailHTML += `<tr>
                         <td>${test}</td>
-                        <td class="${passed ? 'passed' : 'pending'}">${passed ? '✅ PASSED' : '❌ Pending'}</td>
+                        <td style="text-align:center;">
+                            <label class="toggle">
+                                <input type="checkbox" ${isPassed ? 'checked' : ''} 
+                                       onchange="toggleTest(${studentIndex}, '${test}', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                        </td>
                     </tr>`;
                 });
-                
-                html += `</tbody></table></div>`;
+                detailHTML += `</table></div>`;
             });
-            document.getElementById('all-students').innerHTML = html;
+            document.getElementById('all-students').innerHTML = detailHTML;
         }
 
-        renderLeaderboard();
-        renderDetailed();
+        window.toggleTest = function(studentIndex, testName, newValue) {
+            students[studentIndex].tests[testName] = newValue ? 1 : 0;
+            saveProgress();
+            renderAll();   // Refresh everything live
+        };
+
+        // Initial render
+        renderAll();
     </script>
 </body>
 </html>
