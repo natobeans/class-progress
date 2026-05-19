@@ -84,17 +84,6 @@
             { name: "Zee Vieira Fernandes", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":0, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":1, "T265 Soil Moisture":0, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":1, "T152 Air Content":1, "R100 Cylinders":1 }}
         ];
 
-        // Real-time sync from Firebase
-        progressRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) students = data;
-            renderAll();
-        });
-
-        function saveProgress() {
-            progressRef.set(students);
-        }
-
         function calculatePercent(student) {
             const passed = Object.values(student.tests).filter(v => v === 1).length;
             return Math.round((passed / testOrder.length) * 100);
@@ -142,19 +131,32 @@
             document.getElementById('table-body').innerHTML = bodyHTML;
         }
 
-        window.toggleTest = function(studentIndex, testName, newValue) {
-            students[studentIndex].tests[testName] = newValue ? 1 : 0;
-            renderAll();        // Immediate update
-            saveProgress();     // Save to Firebase for others
-        };
-
         function renderAll() {
             renderLeaderboard();
             renderTable();
         }
 
-        // Initial load
-        renderAll();
+        window.toggleTest = function(studentIndex, testName, newValue) {
+            students[studentIndex].tests[testName] = newValue ? 1 : 0;
+            renderAll();           // Immediate visual update
+            progressRef.set(students);  // Save to Firebase
+        };
+
+        // Load latest data from Firebase on page load / refresh
+        progressRef.once('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) students = data;
+            renderAll();
+        });
+
+        // Listen for changes made by other users
+        progressRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                students = data;
+                renderAll();
+            }
+        });
     </script>
 </body>
 </html>
