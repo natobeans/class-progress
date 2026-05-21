@@ -1,143 +1,645 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CE 210 - WAQTC Progress Tracker</title>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
-        body {font-family: 'Roboto', Arial, sans-serif; background: linear-gradient(135deg, #f0f4f8, #e0e9f2); margin:0; padding:20px; color:#333;}
-        .container {max-width:1400px; margin:0 auto; background:white; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,0.12); overflow:hidden;}
-        header {background:linear-gradient(90deg,#1e3a8a,#3b82f6); color:white; padding:40px 20px; text-align:center;}
-        .content {padding:30px;}
-        .controls {text-align:center; margin:20px 0;}
-        button {padding:12px 24px; font-size:1.1em; margin:5px; border:none; border-radius:8px; cursor:pointer;}
-        .save-btn {background:#22c55e; color:white;}
-        .reset-btn {background:#ef4444; color:white;}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CE 210 Materials Lab - WAQTC Progress Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+  :root {
+    --blue-900: #0c2340;
+    --blue-800: #133a6a;
+    --blue-700: #1a4f8e;
+    --blue-600: #2563eb;
+    --blue-500: #3b82f6;
+    --blue-100: #dbeafe;
+    --blue-50: #eff6ff;
+    --green-600: #16a34a;
+    --green-500: #22c55e;
+    --green-400: #4ade80;
+    --green-100: #dcfce7;
+    --green-50: #f0fdf4;
+    --gray-900: #111827;
+    --gray-700: #374151;
+    --gray-500: #6b7280;
+    --gray-400: #9ca3af;
+    --gray-300: #d1d5db;
+    --gray-200: #e5e7eb;
+    --gray-100: #f3f4f6;
+    --gray-50: #f9fafb;
+    --red-500: #ef4444;
+    --red-100: #fee2e2;
+    --amber-500: #f59e0b;
+    --amber-100: #fef3c7;
+    --white: #ffffff;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--gray-100);
+    color: var(--gray-900);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: linear-gradient(135deg, var(--blue-900) 0%, var(--blue-700) 100%);
+    color: var(--white);
+    padding: 28px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .header-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 6px;
+  }
+  .header-icon {
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    backdrop-filter: blur(4px);
+  }
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  .header p {
+    font-size: 14px;
+    opacity: 0.75;
+    margin-left: 60px;
+    font-weight: 400;
+  }
+
+  /* ── Container ── */
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 24px 48px;
+  }
+
+  /* ── Action Bar ── */
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-save {
+    background: var(--blue-600);
+    color: var(--white);
+  }
+  .btn-save:hover { background: var(--blue-700); box-shadow: var(--shadow-md); }
+  .btn-save.saved {
+    background: var(--green-600);
+  }
+  .btn-reset {
+    background: var(--white);
+    color: var(--gray-700);
+    border: 1px solid var(--gray-300);
+  }
+  .btn-reset:hover { background: var(--gray-50); border-color: var(--gray-400); }
+  .status-msg {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--gray-500);
+    padding: 0 8px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .status-msg.visible { opacity: 1; }
+
+  /* ── Leaderboard ── */
+  .section-label {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--gray-500);
+    margin-bottom: 12px;
+  }
+  .leaderboard-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    padding: 24px;
+    margin-bottom: 28px;
+  }
+  .leaderboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+  }
+  .lb-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    background: var(--gray-50);
+    transition: background 0.2s ease, transform 0.3s ease;
+  }
+  .lb-row:hover { background: var(--blue-50); }
+  .lb-row.rank-1 { background: linear-gradient(135deg, #fef9c3 0%, #fef3c7 100%); }
+  .lb-row.rank-2 { background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); }
+  .lb-row.rank-3 { background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%); }
+  .lb-rank {
+    font-size: 20px;
+    width: 32px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .lb-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .lb-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-900);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .lb-bar-track {
+    height: 8px;
+    background: var(--gray-200);
+    border-radius: 99px;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+  .lb-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--blue-500), var(--green-500));
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    min-width: 0;
+  }
+  .lb-pct {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--blue-600);
+    min-width: 44px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* ── Table ── */
+  .table-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+  }
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 1200px;
+  }
+  thead th {
+    background: var(--blue-900);
+    color: var(--white);
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 14px 10px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    white-space: nowrap;
+    border-bottom: 3px solid var(--blue-600);
+  }
+  thead th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 20;
+    min-width: 180px;
+    text-align: left;
+    padding-left: 20px;
+  }
+  thead th a {
+    color: var(--white);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  thead th a:hover {
+    color: var(--blue-100);
+    text-decoration: underline;
+  }
+  tbody tr {
+    transition: background 0.15s;
+  }
+  tbody tr:nth-child(even) { background: var(--gray-50); }
+  tbody tr:hover { background: var(--blue-50); }
+  tbody td {
+    padding: 12px 10px;
+    text-align: center;
+    border-bottom: 1px solid var(--gray-200);
+    vertical-align: middle;
+  }
+  tbody td:first-child {
+    position: sticky;
+    left: 0;
+    background: inherit;
+    z-index: 5;
+    text-align: left;
+    padding-left: 20px;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--gray-900);
+    white-space: nowrap;
+  }
+  tbody tr:nth-child(even) td:first-child { background: var(--gray-50); }
+  tbody tr:hover td:first-child { background: var(--blue-50); }
+
+  /* ── Toggle Switch ── */
+  .toggle {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle .slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: var(--gray-300);
+    border-radius: 99px;
+    transition: background 0.25s ease, box-shadow 0.25s ease;
+  }
+  .toggle .slider::before {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    left: 3px; bottom: 3px;
+    background: var(--white);
+    border-radius: 50%;
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .toggle input:checked + .slider {
+    background: var(--green-500);
+    box-shadow: 0 0 8px rgba(34,197,94,0.35);
+  }
+  .toggle input:checked + .slider::before {
+    transform: translateX(20px);
+  }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    padding: 32px 0 12px;
+    font-size: 12px;
+    color: var(--gray-400);
+  }
+  .footer a { color: var(--blue-500); text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+
+  /* ── Firebase Config Modal ── */
+  .fb-banner {
+    background: var(--amber-100);
+    border: 1px solid var(--amber-500);
+    border-radius: var(--radius-sm);
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--gray-700);
+  }
+  .fb-banner strong { color: var(--gray-900); }
+  .fb-banner.connected {
+    background: var(--green-100);
+    border-color: var(--green-500);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .header { padding: 20px 16px; }
+    .header h1 { font-size: 20px; }
+    .header p { margin-left: 0; margin-top: 4px; }
+    .header-top { flex-wrap: wrap; }
+    .container { padding: 16px 12px 40px; }
+    .leaderboard-grid { grid-template-columns: 1fr; }
+    .action-bar { flex-direction: column; }
+    .btn { width: 100%; justify-content: center; }
+    thead th:first-child { min-width: 140px; }
+  }
+
+  /* ── Animations ── */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .leaderboard-card { animation: fadeInUp 0.4s ease both; }
+  .table-card { animation: fadeInUp 0.4s ease 0.1s both; }
+</style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🧪 CE 210 Materials Lab</h1>
-            <p class="subtitle">Live Shared WAQTC Progress Tracker</p>
-        </header>
 
-        <div class="content">
-            <div class="controls">
-                <button class="save-btn" onclick="saveProgress()">💾 SAVE ALL CHANGES</button>
-                <button class="reset-btn" onclick="resetToDefault()">🔄 Reset to Initial Data</button>
-            </div>
-
-            <h2>🏆 Class Leaderboard</h2>
-            <div id="leaderboard">Loading...</div>
-
-            <h2>📋 Progress Table (Scroll →)</h2>
-            <div style="overflow-x:auto; border:1px solid #ddd;">
-                <table id="progress-table" style="width:100%; min-width:1600px; border-collapse:collapse;">
-                    <thead id="table-header"></thead>
-                    <tbody id="table-body"></tbody>
-                </table>
-            </div>
-        </div>
+<header class="header">
+  <div class="header-content">
+    <div class="header-top">
+      <div class="header-icon">🏗️</div>
+      <h1>CE 210 Materials Lab — WAQTC Progress Tracker</h1>
     </div>
+    <p>Western Alliance for Quality Transportation Construction · Certification Progress</p>
+  </div>
+</header>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyApz5GMmNmdSfdnzccx6tLlv-OCs8J4apg",
-            authDomain: "ce210-progress.firebaseapp.com",
-            databaseURL: "https://ce210-progress-default-rtdb.firebaseio.com",
-            projectId: "ce210-progress",
-            storageBucket: "ce210-progress.firebasestorage.app",
-            messagingSenderId: "758989109332",
-            appId: "1:758989109332:web:cea35e5fdad138398795c1"
-        };
+<main class="container">
 
-        firebase.initializeApp(firebaseConfig);
-        const progressRef = firebase.database().ref('ce210Progress');
+  <!-- Firebase Status -->
+  <div class="fb-banner" id="fbBanner">
+    ⚠️ <span><strong>Local Mode:</strong> Firebase not configured. Data saves to browser localStorage. To enable cloud sync, update the Firebase config in the script below.</span>
+  </div>
 
-        const testOrder = ["R90 Sampling","R76 Reducing","T27/T11 Gradation","T255 Moisture","T85 Spec Gravity","T335 Fracture","T176 Sand Eq","T99/T180 Proctor","R75 Family Curves","T265 Soil Moisture","TM2 Sampling","T309 Temp","T119 Slump","T121 Density","T152 Air Content","R100 Cylinders"];
+  <!-- Action Buttons -->
+  <div class="action-bar">
+    <button class="btn btn-save" id="saveBtn" onclick="saveData()">💾 SAVE ALL CHANGES</button>
+    <button class="btn btn-reset" onclick="resetData()">↻ Reset to Initial Data</button>
+    <span class="status-msg" id="statusMsg"></span>
+  </div>
 
-        let students = [];
+  <!-- Leaderboard -->
+  <div class="section-label">Class Leaderboard</div>
+  <div class="leaderboard-card">
+    <div class="leaderboard-grid" id="leaderboard"></div>
+  </div>
 
-        const defaultStudents = [
-            { name: "James Benner", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":0, "T85 Spec Gravity":1, "T335 Fracture":0, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":0, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":0, "T121 Density":1, "T152 Air Content":0, "R100 Cylinders":1 }},
-            { name: "Joshua Christensen", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":1, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":1, "T152 Air Content":1, "R100 Cylinders":1 }},
-            { name: "Mfundo Dlamini", tests: { "R90 Sampling":1, "R76 Reducing":0, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":0, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":0, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":0, "T152 Air Content":1, "R100 Cylinders":1 }},
-            { name: "Abbey Eichmann", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":0, "T99/T180 Proctor":1, "R75 Family Curves":1, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":0, "T119 Slump":1, "T121 Density":1, "T152 Air Content":1, "R100 Cylinders":1 }},
-            { name: "Eduarda Iunes", tests: { "R90 Sampling":0, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":0, "R75 Family Curves":1, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":1, "T152 Air Content":0, "R100 Cylinders":1 }},
-            { name: "Ammon Obbanya", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":0, "T255 Moisture":1, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":1, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":1, "T152 Air Content":1, "R100 Cylinders":0 }},
-            { name: "Gadiel Perez", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":1, "T85 Spec Gravity":1, "T335 Fracture":0, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":0, "T265 Soil Moisture":1, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":0, "T121 Density":1, "T152 Air Content":1, "R100 Cylinders":1 }},
-            { name: "Zee Vieira Fernandes", tests: { "R90 Sampling":1, "R76 Reducing":1, "T27/T11 Gradation":1, "T255 Moisture":0, "T85 Spec Gravity":1, "T335 Fracture":1, "T176 Sand Eq":1, "T99/T180 Proctor":1, "R75 Family Curves":1, "T265 Soil Moisture":0, "TM2 Sampling":1, "T309 Temp":1, "T119 Slump":1, "T121 Density":1, "T152 Air Content":1, "R100 Cylinders":1 }}
-        ];
+  <!-- Test Matrix Table -->
+  <div class="section-label">Certification Matrix</div>
+  <div class="table-card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr id="tableHead"></tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
 
-        function calculatePercent(s) {
-            return Math.round(Object.values(s.tests).filter(v => v === 1).length / testOrder.length * 100);
-        }
+  <div class="footer">
+    WAQTC Resources: <a href="https://www.waqtc.org/technician-resources/" target="_blank" rel="noopener">waqtc.org/technician-resources</a>
+  </div>
+</main>
 
-        function renderAll() {
-            // Leaderboard
-            const sorted = [...students].sort((a,b) => calculatePercent(b) - calculatePercent(a));
-            let html = '';
-            sorted.forEach((s,i) => {
-                const pct = calculatePercent(s);
-                const rank = i===0 ? '🏆 ' : i===1 ? '🥇 ' : i===2 ? '🥈 ' : i===3 ? '🥉 ' : '';
-                html += `<div style="background:#f8fafc;padding:18px;border-radius:12px;margin-bottom:12px;">
-                    <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><strong>${rank}${s.name}</strong><strong>${pct}%</strong></div>
-                    <div style="height:38px;background:#e2e8f0;border-radius:999px;overflow:hidden;"><div class="progress-bar" style="width:${pct}%">${pct}%</div></div>
-                </div>`;
-            });
-            document.getElementById('leaderboard').innerHTML = html;
-            
-            // Table
-            let header = `<tr><th>Student</th>`;
-            testOrder.forEach(t => header += `<th>${t}</th>`);
-            header += `</tr>`;
-            document.getElementById('table-header').innerHTML = header;
+<script>
+// ─── Data ───
+const STUDENTS = [
+  "James Benner",
+  "Joshua Christensen",
+  "Mfundo Dlamini",
+  "Abbey Eichmann",
+  "Eduarda Iunes",
+  "Ammon Obbanya",
+  "Gadiel Perez",
+  "Zee Vieira Fernandes"
+];
 
-            let body = '';
-            students.forEach((s, i) => {
-                body += `<tr><td class="student-name">${s.name}</td>`;
-                testOrder.forEach(t => {
-                    const checked = s.tests[t] ? 'checked' : '';
-                    body += `<td><label class="toggle"><input type="checkbox" ${checked} onchange="toggleTest(${i}, '${t}', this.checked)"><span class="slider"></span></label></td>`;
-                });
-                body += `</tr>`;
-            });
-            document.getElementById('table-body').innerHTML = body;
-        }
+const TESTS = [
+  "R90 Sampling",
+  "R76 Reducing",
+  "T27/T11 Gradation",
+  "T255 Moisture",
+  "T85 Spec Gravity",
+  "T335 Fracture",
+  "T176 Sand Eq",
+  "T99/T180 Proctor",
+  "R75 Family Curves",
+  "T265 Soil Moisture",
+  "TM2 Sampling",
+  "T309 Temp",
+  "T119 Slump",
+  "T121 Density",
+  "T152 Air Content",
+  "R100 Cylinders"
+];
 
-        window.toggleTest = function(i, test, val) {
-            students[i].tests[test] = val ? 1 : 0;
-            renderAll();
-        };
+const LINK = "https://www.waqtc.org/technician-resources/";
 
-        window.saveProgress = function() {
-            progressRef.set(students).then(() => alert("✅ Saved!")).catch(() => alert("Save failed"));
-        };
+// State: { "StudentName": { "TestName": true/false, ... }, ... }
+let data = {};
 
-        window.resetToDefault = function() {
-            if (confirm("Reset all data?")) {
-                students = JSON.parse(JSON.stringify(defaultStudents));
-                renderAll();
-                saveProgress();
-            }
-        };
+// ─── Firebase Setup ───
+// Replace with your own Firebase config to enable cloud sync.
+const firebaseConfig = {
+  apiKey: "",
+  authDomain: "",
+  databaseURL: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: ""
+};
 
-        // Start with default data immediately
-        students = JSON.parse(JSON.stringify(defaultStudents));
-        renderAll();
+let db = null;
+let useFirebase = false;
 
-        // Try to load saved data
-        progressRef.once('value', (snap) => {
-            const data = snap.val();
-            if (data && data.length > 0) {
-                students = data;
-                renderAll();
-            }
-        });
-    </script>
+function initFirebase() {
+  if (firebaseConfig.apiKey && firebaseConfig.databaseURL) {
+    try {
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.database();
+      useFirebase = true;
+      const banner = document.getElementById('fbBanner');
+      banner.className = 'fb-banner connected';
+      banner.innerHTML = '✅ <span><strong>Cloud Mode:</strong> Connected to Firebase. Changes sync in real-time.</span>';
+      loadFromFirebase();
+    } catch(e) {
+      console.warn('Firebase init failed:', e);
+      loadLocal();
+    }
+  } else {
+    loadLocal();
+  }
+}
+
+function loadFromFirebase() {
+  db.ref('ce210').on('value', (snap) => {
+    const val = snap.val();
+    if (val) {
+      data = val;
+    } else {
+      initDefaultData();
+    }
+    render();
+  });
+}
+
+function loadLocal() {
+  const saved = localStorage.getItem('ce210_data');
+  if (saved) {
+    try { data = JSON.parse(saved); } catch(e) { initDefaultData(); }
+  } else {
+    initDefaultData();
+  }
+  render();
+}
+
+function initDefaultData() {
+  data = {};
+  STUDENTS.forEach(s => {
+    data[s] = {};
+    TESTS.forEach(t => { data[s][t] = false; });
+  });
+}
+
+// ─── Save / Reset ───
+function saveData() {
+  if (useFirebase) {
+    db.ref('ce210').set(data).then(() => showStatus('✅ Saved to cloud!')).catch(() => showStatus('❌ Save failed'));
+  } else {
+    localStorage.setItem('ce210_data', JSON.stringify(data));
+    showStatus('✅ Saved locally!');
+  }
+  const btn = document.getElementById('saveBtn');
+  btn.classList.add('saved');
+  btn.textContent = '✅ SAVED!';
+  setTimeout(() => { btn.classList.remove('saved'); btn.innerHTML = '💾 SAVE ALL CHANGES'; }, 1800);
+}
+
+function resetData() {
+  if (!confirm('Reset all progress to zero? This cannot be undone.')) return;
+  initDefaultData();
+  if (useFirebase) {
+    db.ref('ce210').set(data);
+  } else {
+    localStorage.setItem('ce210_data', JSON.stringify(data));
+  }
+  render();
+  showStatus('↻ Data reset');
+}
+
+function showStatus(msg) {
+  const el = document.getElementById('statusMsg');
+  el.textContent = msg;
+  el.classList.add('visible');
+  setTimeout(() => el.classList.remove('visible'), 2500);
+}
+
+// ─── Render ───
+function render() {
+  renderTable();
+  renderLeaderboard();
+}
+
+function renderTable() {
+  // Header
+  const headRow = document.getElementById('tableHead');
+  headRow.innerHTML = '<th>Student</th>' + TESTS.map(t =>
+    `<th><a href="${LINK}" target="_blank" rel="noopener" title="View ${t} resources">${t}</a></th>`
+  ).join('');
+
+  // Body
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = STUDENTS.map(student => {
+    const cells = TESTS.map(test => {
+      const checked = data[student] && data[student][test] ? 'checked' : '';
+      return `<td>
+        <label class="toggle">
+          <input type="checkbox" ${checked} onchange="toggleTest('${student}','${test}', this.checked)">
+          <span class="slider"></span>
+        </label>
+      </td>`;
+    }).join('');
+    return `<tr><td>${student}</td>${cells}</tr>`;
+  }).join('');
+}
+
+function renderLeaderboard() {
+  const scores = STUDENTS.map(s => {
+    const passed = TESTS.filter(t => data[s] && data[s][t]).length;
+    return { name: s, passed, pct: Math.round((passed / TESTS.length) * 100) };
+  }).sort((a,b) => b.passed - a.passed || a.name.localeCompare(b.name));
+
+  const rankEmoji = (i) => {
+    if (i === 0) return '🏆';
+    if (i === 1) return '🥇';
+    if (i === 2) return '🥈';
+    if (i === 3) return '🥉';
+    return `<span style="font-size:13px;color:var(--gray-400)">#${i+1}</span>`;
+  };
+
+  const grid = document.getElementById('leaderboard');
+  grid.innerHTML = scores.map((s, i) => {
+    const rankClass = i < 3 ? ` rank-${i+1}` : '';
+    return `<div class="lb-row${rankClass}">
+      <div class="lb-rank">${rankEmoji(i)}</div>
+      <div class="lb-info">
+        <div class="lb-name">${s.name}</div>
+        <div class="lb-bar-track">
+          <div class="lb-bar-fill" style="width:${s.pct}%"></div>
+        </div>
+      </div>
+      <div class="lb-pct">${s.pct}%</div>
+    </div>`;
+  }).join('');
+}
+
+// ─── Toggle Handler ───
+function toggleTest(student, test, val) {
+  if (!data[student]) data[student] = {};
+  data[student][test] = val;
+  renderLeaderboard();
+}
+
+// ─── Init ───
+initFirebase();
+</script>
 </body>
 </html>
