@@ -1,645 +1,403 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CE 210 Materials Lab - WAQTC Progress Tracker</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CE 210 — Pass-Off Tracker</title>
 <style>
-  :root {
-    --blue-900: #0c2340;
-    --blue-800: #133a6a;
-    --blue-700: #1a4f8e;
-    --blue-600: #2563eb;
-    --blue-500: #3b82f6;
-    --blue-100: #dbeafe;
-    --blue-50: #eff6ff;
-    --green-600: #16a34a;
-    --green-500: #22c55e;
-    --green-400: #4ade80;
-    --green-100: #dcfce7;
-    --green-50: #f0fdf4;
-    --gray-900: #111827;
-    --gray-700: #374151;
-    --gray-500: #6b7280;
-    --gray-400: #9ca3af;
-    --gray-300: #d1d5db;
-    --gray-200: #e5e7eb;
-    --gray-100: #f3f4f6;
-    --gray-50: #f9fafb;
-    --red-500: #ef4444;
-    --red-100: #fee2e2;
-    --amber-500: #f59e0b;
-    --amber-100: #fef3c7;
-    --white: #ffffff;
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
-    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
-    --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
-    --radius: 12px;
-    --radius-sm: 8px;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--gray-100);
-    color: var(--gray-900);
-    min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  /* ── Header ── */
-  .header {
-    background: linear-gradient(135deg, var(--blue-900) 0%, var(--blue-700) 100%);
-    color: var(--white);
-    padding: 28px 32px;
-    position: relative;
-    overflow: hidden;
-  }
-  .header::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  }
-  .header-content {
-    max-width: 1400px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 1;
-  }
-  .header-top {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 6px;
-  }
-  .header-icon {
-    width: 44px; height: 44px;
-    background: rgba(255,255,255,0.15);
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-    backdrop-filter: blur(4px);
-  }
-  .header h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 26px;
-    font-weight: 700;
-    letter-spacing: -0.3px;
-  }
-  .header p {
-    font-size: 14px;
-    opacity: 0.75;
-    margin-left: 60px;
-    font-weight: 400;
-  }
-
-  /* ── Container ── */
-  .container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 24px 24px 48px;
-  }
-
-  /* ── Action Bar ── */
-  .action-bar {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-  }
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
-    border: none;
-    border-radius: var(--radius-sm);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: var(--shadow-sm);
-  }
-  .btn:active { transform: scale(0.97); }
-  .btn-save {
-    background: var(--blue-600);
-    color: var(--white);
-  }
-  .btn-save:hover { background: var(--blue-700); box-shadow: var(--shadow-md); }
-  .btn-save.saved {
-    background: var(--green-600);
-  }
-  .btn-reset {
-    background: var(--white);
-    color: var(--gray-700);
-    border: 1px solid var(--gray-300);
-  }
-  .btn-reset:hover { background: var(--gray-50); border-color: var(--gray-400); }
-  .status-msg {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    color: var(--gray-500);
-    padding: 0 8px;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  .status-msg.visible { opacity: 1; }
-
-  /* ── Leaderboard ── */
-  .section-label {
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: var(--gray-500);
-    margin-bottom: 12px;
-  }
-  .leaderboard-card {
-    background: var(--white);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-md);
-    padding: 24px;
-    margin-bottom: 28px;
-  }
-  .leaderboard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 12px;
-  }
-  .lb-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 14px;
-    border-radius: var(--radius-sm);
-    background: var(--gray-50);
-    transition: background 0.2s ease, transform 0.3s ease;
-  }
-  .lb-row:hover { background: var(--blue-50); }
-  .lb-row.rank-1 { background: linear-gradient(135deg, #fef9c3 0%, #fef3c7 100%); }
-  .lb-row.rank-2 { background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); }
-  .lb-row.rank-3 { background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%); }
-  .lb-rank {
-    font-size: 20px;
-    width: 32px;
-    text-align: center;
-    flex-shrink: 0;
-  }
-  .lb-info {
-    flex: 1;
-    min-width: 0;
-  }
-  .lb-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--gray-900);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .lb-bar-track {
-    height: 8px;
-    background: var(--gray-200);
-    border-radius: 99px;
-    margin-top: 6px;
-    overflow: hidden;
-  }
-  .lb-bar-fill {
-    height: 100%;
-    border-radius: 99px;
-    background: linear-gradient(90deg, var(--blue-500), var(--green-500));
-    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
-    min-width: 0;
-  }
-  .lb-pct {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--blue-600);
-    min-width: 44px;
-    text-align: right;
-    flex-shrink: 0;
-  }
-
-  /* ── Table ── */
-  .table-card {
-    background: var(--white);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-md);
-    overflow: hidden;
-  }
-  .table-wrap {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    min-width: 1200px;
-  }
-  thead th {
-    background: var(--blue-900);
-    color: var(--white);
-    font-size: 11.5px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding: 14px 10px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    white-space: nowrap;
-    border-bottom: 3px solid var(--blue-600);
-  }
-  thead th:first-child {
-    position: sticky;
-    left: 0;
-    z-index: 20;
-    min-width: 180px;
-    text-align: left;
-    padding-left: 20px;
-  }
-  thead th a {
-    color: var(--white);
-    text-decoration: none;
-    transition: color 0.15s;
-  }
-  thead th a:hover {
-    color: var(--blue-100);
-    text-decoration: underline;
-  }
-  tbody tr {
-    transition: background 0.15s;
-  }
-  tbody tr:nth-child(even) { background: var(--gray-50); }
-  tbody tr:hover { background: var(--blue-50); }
-  tbody td {
-    padding: 12px 10px;
-    text-align: center;
-    border-bottom: 1px solid var(--gray-200);
-    vertical-align: middle;
-  }
-  tbody td:first-child {
-    position: sticky;
-    left: 0;
-    background: inherit;
-    z-index: 5;
-    text-align: left;
-    padding-left: 20px;
-    font-weight: 600;
-    font-size: 14px;
-    color: var(--gray-900);
-    white-space: nowrap;
-  }
-  tbody tr:nth-child(even) td:first-child { background: var(--gray-50); }
-  tbody tr:hover td:first-child { background: var(--blue-50); }
-
-  /* ── Toggle Switch ── */
-  .toggle {
-    position: relative;
-    display: inline-block;
-    width: 44px;
-    height: 24px;
-  }
-  .toggle input { opacity: 0; width: 0; height: 0; }
-  .toggle .slider {
-    position: absolute;
-    cursor: pointer;
-    inset: 0;
-    background: var(--gray-300);
-    border-radius: 99px;
-    transition: background 0.25s ease, box-shadow 0.25s ease;
-  }
-  .toggle .slider::before {
-    content: '';
-    position: absolute;
-    width: 18px; height: 18px;
-    left: 3px; bottom: 3px;
-    background: var(--white);
-    border-radius: 50%;
-    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-  }
-  .toggle input:checked + .slider {
-    background: var(--green-500);
-    box-shadow: 0 0 8px rgba(34,197,94,0.35);
-  }
-  .toggle input:checked + .slider::before {
-    transform: translateX(20px);
-  }
-
-  /* ── Footer ── */
-  .footer {
-    text-align: center;
-    padding: 32px 0 12px;
-    font-size: 12px;
-    color: var(--gray-400);
-  }
-  .footer a { color: var(--blue-500); text-decoration: none; }
-  .footer a:hover { text-decoration: underline; }
-
-  /* ── Firebase Config Modal ── */
-  .fb-banner {
-    background: var(--amber-100);
-    border: 1px solid var(--amber-500);
-    border-radius: var(--radius-sm);
-    padding: 14px 20px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 13px;
-    color: var(--gray-700);
-  }
-  .fb-banner strong { color: var(--gray-900); }
-  .fb-banner.connected {
-    background: var(--green-100);
-    border-color: var(--green-500);
-  }
-
-  /* ── Responsive ── */
-  @media (max-width: 768px) {
-    .header { padding: 20px 16px; }
-    .header h1 { font-size: 20px; }
-    .header p { margin-left: 0; margin-top: 4px; }
-    .header-top { flex-wrap: wrap; }
-    .container { padding: 16px 12px 40px; }
-    .leaderboard-grid { grid-template-columns: 1fr; }
-    .action-bar { flex-direction: column; }
-    .btn { width: 100%; justify-content: center; }
-    thead th:first-child { min-width: 140px; }
-  }
-
-  /* ── Animations ── */
-  @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .leaderboard-card { animation: fadeInUp 0.4s ease both; }
-  .table-card { animation: fadeInUp 0.4s ease 0.1s both; }
+  :root{--ink:#16191f;--blue:#1f5fb0;--green:#1c7a4d;--amber:#b5731f;--red:#b3261e;--line:#dde1e6;--muted:#5b636d;--bg:#f6f7f8;--gold:#f2c200;}
+  *{box-sizing:border-box;}
+  body{font-family:Lato,'Helvetica Neue',Arial,sans-serif;color:var(--ink);line-height:1.45;margin:0;background:#fff;}
+  .wrap{max-width:1020px;margin:0 auto;padding:18px 16px 70px;}
+  header{border-bottom:3px solid var(--ink);padding-bottom:10px;}
+  .eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);font-weight:700;}
+  h1{margin:4px 0 2px;font-size:22px;}
+  .sub{color:var(--muted);font-size:13px;}
+  .modebar{font-size:12px;padding:7px 12px;border-radius:5px;margin:10px 0;}
+  .mode-shared{background:#e6f3ec;border:1px solid #cfe0d6;color:#1c5b3c;}
+  .mode-local{background:#fdf8f0;border:1px solid #ecdcc0;color:#7a5114;}
+  nav{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 16px;align-items:center;}
+  .tab{font:inherit;font-size:13px;font-weight:700;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:6px;padding:8px 15px;cursor:pointer;}
+  .tab.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .btn{font:inherit;font-size:12.5px;font-weight:700;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:6px;padding:7px 12px;cursor:pointer;}
+  .btn:hover{background:var(--bg);}
+  .btn.primary{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .btn.go{background:var(--green);color:#fff;border-color:var(--green);}
+  .btn.amber{background:var(--amber);color:#fff;border-color:var(--amber);}
+  .btn.danger{background:#fff;color:var(--red);border-color:#e7b9b4;}
+  .btn.sm{padding:5px 10px;font-size:12px;}
+  .card{border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px;}
+  .card h2{font-size:15px;margin:0 0 4px;}
+  .card h3{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:16px 0 8px;}
+  label.fld{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;margin:10px 0 4px;}
+  select,input[type=text],input[type=number],textarea{font:inherit;font-size:13.5px;padding:7px 9px;border:1px solid var(--line);border-radius:5px;width:100%;background:#fff;color:var(--ink);}
+  textarea{min-height:120px;resize:vertical;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th,td{padding:7px 9px;border-bottom:1px solid #eef0f2;text-align:left;vertical-align:middle;}
+  th{background:var(--bg);font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);}
+  .pill{display:inline-block;font-size:11px;font-weight:700;border-radius:20px;padding:2px 9px;}
+  .p-done{background:#e6f3ec;color:var(--green);} .p-ready{background:#fdf3e3;color:var(--amber);}
+  .p-prog{background:#eef4fb;color:var(--blue);} .p-wait{background:#fff7e0;color:#9a7b14;} .p-none{background:#f1f3f5;color:#9aa1a8;}
+  .muted{color:var(--muted);font-size:12.5px;}
+  .grid-wrap{overflow-x:auto;}
+  table.matrix th.skill{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;font-size:10.5px;height:190px;vertical-align:bottom;text-align:center;padding:6px 2px;}
+  table.matrix td.cell{text-align:center;font-size:14px;} table.matrix td.name{font-weight:700;white-space:nowrap;}
+  .ok{color:var(--green);font-weight:700;} .half{color:var(--blue);} .waitc{color:var(--amber);}
+  .flag{background:#fbe9e7;border:1px solid #f0c9c4;border-left:5px solid var(--red);border-radius:6px;padding:10px 13px;font-size:13px;color:#7a241c;margin-bottom:8px;}
+  .rank{display:inline-block;width:24px;font-weight:700;color:var(--muted);}
+  .rank.r1{color:#c79a00;} .rank.r2{color:#8a929b;} .rank.r3{color:#b5731f;}
+  .prow{display:flex;align-items:center;gap:12px;padding:6px 0;}
+  .pname{flex:0 0 170px;font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .pbar{flex:1;background:#eef0f2;border-radius:20px;height:14px;overflow:hidden;}
+  .pfill{height:100%;background:linear-gradient(90deg,#1c7a4d,#3aa873);border-radius:20px;transition:width .7s ease;}
+  .pfill.low{background:linear-gradient(90deg,#b5731f,#d59a3f);}
+  .pcount{flex:0 0 60px;text-align:right;font-size:12.5px;color:var(--muted);}
+  .loading{padding:40px;text-align:center;color:var(--muted);}
+  .row2{display:flex;gap:14px;flex-wrap:wrap;} .row2>div{flex:1 1 220px;}
+  .statbox{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+  .stat{flex:1 1 120px;border:1px solid var(--line);border-radius:8px;padding:10px 13px;}
+  .stat .n{font-size:22px;font-weight:700;} .stat .l{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);}
+  .qrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 0;border-bottom:1px solid #eef0f2;}
+  .qrow .who{font-weight:700;} .qrow .sk{color:var(--muted);font-size:12.5px;}
+  .qrow .claim{display:flex;gap:6px;align-items:center;margin-left:auto;}
+  .qrow select{width:auto;min-width:130px;}
+  .empty{color:#9aa1a8;font-size:13px;padding:8px 0;}
+  .actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
 </style>
 </head>
 <body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">CE 210 · Civil Engineering Materials Lab</div>
+    <h1 id="title">Pass-Off Tracker</h1>
+    <div class="sub">Raise your hand for a coach → get coached → raise your hand to pass off → a proctor pairs up. Coaching and proctoring both earn extra credit.</div>
+  </header>
 
-<header class="header">
-  <div class="header-content">
-    <div class="header-top">
-      <div class="header-icon">🏗️</div>
-      <h1>CE 210 Materials Lab — WAQTC Progress Tracker</h1>
-    </div>
-    <p>Western Alliance for Quality Transportation Construction · Certification Progress</p>
-  </div>
-</header>
+  <div id="modebar" class="modebar mode-local">Checking storage…</div>
 
-<main class="container">
+  <nav>
+    <button class="tab active" data-view="student">Student</button>
+    <button class="tab" data-view="queues">Queues</button>
+    <button class="tab" data-view="dashboard">Dashboard</button>
+    <button class="tab" data-view="setup">Setup</button>
+    <button class="btn" id="soundBtn" style="margin-left:auto">🔔 Sound: on</button>
+    <button class="btn" id="refreshBtn">↻ Refresh</button>
+  </nav>
 
-  <!-- Firebase Status -->
-  <div class="fb-banner" id="fbBanner">
-    ⚠️ <span><strong>Local Mode:</strong> Firebase not configured. Data saves to browser localStorage. To enable cloud sync, update the Firebase config in the script below.</span>
-  </div>
-
-  <!-- Action Buttons -->
-  <div class="action-bar">
-    <button class="btn btn-save" id="saveBtn" onclick="saveData()">💾 SAVE ALL CHANGES</button>
-    <button class="btn btn-reset" onclick="resetData()">↻ Reset to Initial Data</button>
-    <span class="status-msg" id="statusMsg"></span>
-  </div>
-
-  <!-- Leaderboard -->
-  <div class="section-label">Class Leaderboard</div>
-  <div class="leaderboard-card">
-    <div class="leaderboard-grid" id="leaderboard"></div>
-  </div>
-
-  <!-- Test Matrix Table -->
-  <div class="section-label">Certification Matrix</div>
-  <div class="table-card">
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr id="tableHead"></tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="footer">
-    WAQTC Resources: <a href="https://www.waqtc.org/technician-resources/" target="_blank" rel="noopener">waqtc.org/technician-resources</a>
-  </div>
-</main>
+  <div id="app"><div class="loading">Loading…</div></div>
+</div>
 
 <script>
-// ─── Data ───
-const STUDENTS = [
-  "James Benner",
-  "Joshua Christensen",
-  "Mfundo Dlamini",
-  "Abbey Eichmann",
-  "Eduarda Iunes",
-  "Ammon Obbanya",
-  "Gadiel Perez",
-  "Zee Vieira Fernandes"
-];
+(function(){
+  "use strict";
+  var DATA_KEY = "ce210_passoff_v3";
+  var DEFAULT_SKILLS = [
+    "Sampling (R 90)","Reducing / splitting (R 76)","Moisture (T 255)","Sieve analysis (T 27)",
+    "Fines by washing (T 11)","Coarse SG & absorption (T 85)","Fractured faces (T 335)","Sand equivalent (T 176)",
+    "Concrete sampling (TM 2)","Slump (T 119)","Air content (T 152)","Unit weight (T 121)","Concrete temperature (T 309)",
+    "Make cylinders (R 100)","Rice / Gmm (T 209)","Bulk SG asphalt (T 166)",
+    "Proctor (T 99)","Sand cone (T 191)","Nuclear gauge (T 310)",
+    "Family of curves (R 75)","One-point Proctor (T 272)","Asphalt nuclear density (T 355)"
+  ];
+  var DEMO_ROSTER = ["James Benner", "Joshua Christensen", "Mfundo Dlamini", "Abbey Eichmann", "Eduarda Iunes", "Ammon Obbanya", "Gadiel Perez", "Zee Vieira Fernandes"];
+  var DEMO_RECORDS = {"James Benner": {"Sampling (R 90)": {"coachedBy": "Ammon Obbanya", "passedOffBy": "Abbey Eichmann", "date": "4/28", "q": "", "activeBy": ""}, "Reducing / splitting (R 76)": {"coachedBy": "Zee Vieira Fernandes", "passedOffBy": "Abbey Eichmann", "date": "4/30", "q": "", "activeBy": ""}, "Moisture (T 255)": {"coachedBy": "Eduarda Iunes", "passedOffBy": "Zee Vieira Fernandes", "date": "5/5", "q": "", "activeBy": ""}, "Sieve analysis (T 27)": {"coachedBy": "", "passedOffBy": "", "date": "", "q": "coachWait", "activeBy": ""}}, "Joshua Christensen": {"Sampling (R 90)": {"coachedBy": "Abbey Eichmann", "passedOffBy": "Ammon Obbanya", "date": "4/28", "q": "", "activeBy": ""}, "Reducing / splitting (R 76)": {"coachedBy": "Ammon Obbanya", "passedOffBy": "Abbey Eichmann", "date": "4/30", "q": "", "activeBy": ""}, "Moisture (T 255)": {"coachedBy": "Zee Vieira Fernandes", "passedOffBy": "Abbey Eichmann", "date": "5/5", "q": "", "activeBy": ""}, "Sieve analysis (T 27)": {"coachedBy": "Gadiel Perez", "passedOffBy": "Zee Vieira Fernandes", "date": "5/7", "q": "", "activeBy": ""}, "Coarse SG & absorption (T 85)": {"coachedBy": "Abbey Eichmann", "passedOffBy": "Ammon Obbanya", "date": "5/12", "q": "", "activeBy": ""}, "Fractured faces (T 335)": {"coachedBy": "Ammon Obbanya", "passedOffBy": "Zee Vieira Fernandes", "date": "5/14", "q": "", "activeBy": ""}, "Sand equivalent (T 176)": {"coachedBy": "Zee Vieira Fernandes", "passedOffBy": "Abbey Eichmann", "date": "5/19", "q": "", "activeBy": ""}, "Slump (T 119)": {"coachedBy": "Gadiel Perez", "passedOffBy": "Ammon Obbanya", "date": "5/21", "q": "", "activeBy": ""}, "Air content (T 152)": {"coachedBy": "Abbey Eichmann", "passedOffBy": "Zee Vieira Fernandes", "date": "5/26", "q": "", "activeBy": ""}}, "Mfundo Dlamini": {"Sampling (R 90)": {"coachedBy": "Abbey Eichmann", "passedOffBy": "Ammon Obbanya", "date": "4/28", "q": "", "activeBy": ""}, "Reducing / splitting (R 76)": {"coachedBy": "Ammon Obbanya", "passedOffBy": "Zee Vieira Fernandes", "date": "4/30", "q": "", "activeBy": ""}, "Moisture (T 255)": {"coachedBy": "Zee Vieira Fernandes", "passedOffBy": "Abbey Eichmann", "date": "5/5", "q": "", "activeBy": ""}, "Sieve analysis (T 27)": {"coachedBy": "Gadiel Perez", "passedOffBy": "Ammon Obbanya", "date": "5/7", "q": "", "activeBy": ""}, "Coarse SG & absorption (T 85)": {"coachedBy": "Zee Vieira Fernandes", "passedOffBy": "", "date": "", "q": "passWait", "activeBy": ""}}, "Abbey Eichmann": {"Sampling (R 90)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "4/28", "q": "", "activeBy": ""}, "Reducing / splitting (R 76)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "4/30", "q": "", "activeBy": ""}, "Moisture (T 255)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/5", "q": "", "activeBy": ""}, "Sieve analysis (T 27)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/7", "q": "", "activeBy": ""}, "Coarse SG & absorption (T 85)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/12", "q": "", "activeBy": ""}, "Fractured faces (T 335)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/14", "q": "", "activeBy": ""}, "Sand equivalent (T 176)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/19", "q": "", "activeBy": ""}, "Slump (T 119)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/21", "q": "", "activeBy": ""}, "Air content (T 152)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/26", "q": "", "activeBy": ""}, "Unit weight (T 121)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/28", "q": "", "activeBy": ""}, "Concrete temperature (T 309)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "6/4", "q": "", "activeBy": ""}, "Make cylinders (R 100)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "6/9", "q": "", "activeBy": ""}, "Rice / Gmm (T 209)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "6/16", "q": "", "activeBy": ""}, "Bulk SG asphalt (T 166)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "6/23", "q": "", "activeBy": ""}}, "Eduarda Iunes": {"Sampling (R 90)": {"coachedBy": "Ammon Obbanya", "passedOffBy": "Abbey Eichmann", "date": "4/28", "q": "", "activeBy": ""}, "Reducing / splitting (R 76)": {"coachedBy": "Zee Vieira Fernandes", "passedOffBy": "Ammon Obbanya", "date": "4/30", "q": "", "activeBy": ""}, "Moisture (T 255)": {"coachedBy": "Joshua Christensen", "passedOffBy": "Zee Vieira Fernandes", "date": "5/5", "q": "", "activeBy": ""}, "Sieve analysis (T 27)": {"coachedBy": "Abbey Eichmann", "passedOffBy": "Ammon Obbanya", "date": "5/7", "q": "", "activeBy": ""}, "Coarse SG & absorption (T 85)": {"coachedBy": "Ammon Obbanya", "passedOffBy": "Abbey Eichmann", "date": "5/12", "q": "", "activeBy": ""}, "Fractured faces (T 335)": {"coachedBy": "Zee Vieira Fernandes", "passedOffBy": "Abbey Eichmann", "date": "5/14", "q": "", "activeBy": ""}, "Sand equivalent (T 176)": {"coachedBy": "Joshua Christensen", "passedOffBy": "Zee Vieira Fernandes", "date": "5/19", "q": "", "activeBy": ""}, "Slump (T 119)": {"coachedBy": "Abbey Eichmann", "passedOffBy": "Ammon Obbanya", "date": "5/21", "q": "", "activeBy": ""}}, "Ammon Obbanya": {"Sampling (R 90)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "4/28", "q": "", "activeBy": ""}, "Reducing / splitting (R 76)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "4/30", "q": "", "activeBy": ""}, "Moisture (T 255)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/5", "q": "", "activeBy": ""}, "Sieve analysis (T 27)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/7", "q": "", "activeBy": ""}, "Coarse SG & absorption (T 85)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/12", "q": "", "activeBy": ""}, "Fractured faces (T 335)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/14", "q": "", "activeBy": ""}, "Sand equivalent (T 176)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/19", "q": "", "activeBy": ""}, "Slump (T 119)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/21", "q": "", "activeBy": ""}, "Air content (T 152)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/26", "q": "", "activeBy": ""}, "Unit weight (T 121)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/28", "q": "", "activeBy": ""}, "Concrete temperature (T 309)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "6/4", "q": "", "activeBy": ""}, "Make cylinders (R 100)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "6/9", "q": "", "activeBy": ""}, "Rice / Gmm (T 209)": {"coachedBy": "Instructor", "passedOffBy": "", "date": "", "q": "passActive", "activeBy": "Abbey Eichmann"}}, "Gadiel Perez": {"Sampling (R 90)": {"coachedBy": "Ammon Obbanya", "passedOffBy": "Zee Vieira Fernandes", "date": "4/28", "q": "", "activeBy": ""}, "Reducing / splitting (R 76)": {"coachedBy": "Zee Vieira Fernandes", "passedOffBy": "Abbey Eichmann", "date": "4/30", "q": "", "activeBy": ""}, "Moisture (T 255)": {"coachedBy": "Joshua Christensen", "passedOffBy": "Ammon Obbanya", "date": "5/5", "q": "", "activeBy": ""}, "Sieve analysis (T 27)": {"coachedBy": "Abbey Eichmann", "passedOffBy": "Zee Vieira Fernandes", "date": "5/7", "q": "", "activeBy": ""}, "Coarse SG & absorption (T 85)": {"coachedBy": "Ammon Obbanya", "passedOffBy": "Abbey Eichmann", "date": "5/12", "q": "", "activeBy": ""}, "Fractured faces (T 335)": {"coachedBy": "Zee Vieira Fernandes", "passedOffBy": "Ammon Obbanya", "date": "5/14", "q": "", "activeBy": ""}, "Sand equivalent (T 176)": {"coachedBy": "Joshua Christensen", "passedOffBy": "Zee Vieira Fernandes", "date": "5/19", "q": "", "activeBy": ""}, "Slump (T 119)": {"coachedBy": "Abbey Eichmann", "passedOffBy": "Ammon Obbanya", "date": "5/21", "q": "", "activeBy": ""}, "Air content (T 152)": {"coachedBy": "", "passedOffBy": "", "date": "", "q": "coachActive", "activeBy": "Zee Vieira Fernandes"}}, "Zee Vieira Fernandes": {"Sampling (R 90)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "4/28", "q": "", "activeBy": ""}, "Reducing / splitting (R 76)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "4/30", "q": "", "activeBy": ""}, "Moisture (T 255)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/5", "q": "", "activeBy": ""}, "Sieve analysis (T 27)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/7", "q": "", "activeBy": ""}, "Coarse SG & absorption (T 85)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/12", "q": "", "activeBy": ""}, "Fractured faces (T 335)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/14", "q": "", "activeBy": ""}, "Sand equivalent (T 176)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/19", "q": "", "activeBy": ""}, "Slump (T 119)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/21", "q": "", "activeBy": ""}, "Air content (T 152)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/26", "q": "", "activeBy": ""}, "Unit weight (T 121)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/28", "q": "", "activeBy": ""}, "Concrete temperature (T 309)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "6/4", "q": "", "activeBy": ""}, "Make cylinders (R 100)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "6/9", "q": "", "activeBy": ""}, "Rice / Gmm (T 209)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "6/16", "q": "", "activeBy": ""}, "Bulk SG asphalt (T 166)": {"coachedBy": "Instructor", "passedOffBy": "", "date": "", "q": "passWait", "activeBy": ""}}};
+  var state = {
+    className:"CE 210 — Pass-Off Tracker (example data)", roster:DEMO_ROSTER.slice(), staff:["Brother Smith"], skills:DEFAULT_SKILLS.slice(),
+    config:{ ecPerCoach:1, ecPerProctor:1, instructorCode:"" }, records:JSON.parse(JSON.stringify(DEMO_RECORDS))
+  };
+  var currentView="student", selectedStudent="", manualStudent="", unlocked=false;
+  var soundOn=true, audioCtx=null, lastWait=0, lastActiveSel=0;
 
-const TESTS = [
-  "R90 Sampling",
-  "R76 Reducing",
-  "T27/T11 Gradation",
-  "T255 Moisture",
-  "T85 Spec Gravity",
-  "T335 Fracture",
-  "T176 Sand Eq",
-  "T99/T180 Proctor",
-  "R75 Family Curves",
-  "T265 Soil Moisture",
-  "TM2 Sampling",
-  "T309 Temp",
-  "T119 Slump",
-  "T121 Density",
-  "T152 Air Content",
-  "R100 Cylinders"
-];
-
-const LINK = "https://www.waqtc.org/technician-resources/";
-
-// State: { "StudentName": { "TestName": true/false, ... }, ... }
-let data = {};
-
-// ─── Firebase Setup ───
-// Replace with your own Firebase config to enable cloud sync.
-const firebaseConfig = {
-  apiKey: "",
-  authDomain: "",
-  databaseURL: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
-};
-
-let db = null;
-let useFirebase = false;
-
-function initFirebase() {
-  if (firebaseConfig.apiKey && firebaseConfig.databaseURL) {
-    try {
-      firebase.initializeApp(firebaseConfig);
-      db = firebase.database();
-      useFirebase = true;
-      const banner = document.getElementById('fbBanner');
-      banner.className = 'fb-banner connected';
-      banner.innerHTML = '✅ <span><strong>Cloud Mode:</strong> Connected to Firebase. Changes sync in real-time.</span>';
-      loadFromFirebase();
-    } catch(e) {
-      console.warn('Firebase init failed:', e);
-      loadLocal();
-    }
-  } else {
-    loadLocal();
-  }
-}
-
-function loadFromFirebase() {
-  db.ref('ce210').on('value', (snap) => {
-    const val = snap.val();
-    if (val) {
-      data = val;
-    } else {
-      initDefaultData();
-    }
-    render();
-  });
-}
-
-function loadLocal() {
-  const saved = localStorage.getItem('ce210_data');
-  if (saved) {
-    try { data = JSON.parse(saved); } catch(e) { initDefaultData(); }
-  } else {
-    initDefaultData();
-  }
-  render();
-}
-
-function initDefaultData() {
-  data = {};
-  STUDENTS.forEach(s => {
-    data[s] = {};
-    TESTS.forEach(t => { data[s][t] = false; });
-  });
-}
-
-// ─── Save / Reset ───
-function saveData() {
-  if (useFirebase) {
-    db.ref('ce210').set(data).then(() => showStatus('✅ Saved to cloud!')).catch(() => showStatus('❌ Save failed'));
-  } else {
-    localStorage.setItem('ce210_data', JSON.stringify(data));
-    showStatus('✅ Saved locally!');
-  }
-  const btn = document.getElementById('saveBtn');
-  btn.classList.add('saved');
-  btn.textContent = '✅ SAVED!';
-  setTimeout(() => { btn.classList.remove('saved'); btn.innerHTML = '💾 SAVE ALL CHANGES'; }, 1800);
-}
-
-function resetData() {
-  if (!confirm('Reset all progress to zero? This cannot be undone.')) return;
-  initDefaultData();
-  if (useFirebase) {
-    db.ref('ce210').set(data);
-  } else {
-    localStorage.setItem('ce210_data', JSON.stringify(data));
-  }
-  render();
-  showStatus('↻ Data reset');
-}
-
-function showStatus(msg) {
-  const el = document.getElementById('statusMsg');
-  el.textContent = msg;
-  el.classList.add('visible');
-  setTimeout(() => el.classList.remove('visible'), 2500);
-}
-
-// ─── Render ───
-function render() {
-  renderTable();
-  renderLeaderboard();
-}
-
-function renderTable() {
-  // Header
-  const headRow = document.getElementById('tableHead');
-  headRow.innerHTML = '<th>Student</th>' + TESTS.map(t =>
-    `<th><a href="${LINK}" target="_blank" rel="noopener" title="View ${t} resources">${t}</a></th>`
-  ).join('');
-
-  // Body
-  const tbody = document.getElementById('tableBody');
-  tbody.innerHTML = STUDENTS.map(student => {
-    const cells = TESTS.map(test => {
-      const checked = data[student] && data[student][test] ? 'checked' : '';
-      return `<td>
-        <label class="toggle">
-          <input type="checkbox" ${checked} onchange="toggleTest('${student}','${test}', this.checked)">
-          <span class="slider"></span>
-        </label>
-      </td>`;
-    }).join('');
-    return `<tr><td>${student}</td>${cells}</tr>`;
-  }).join('');
-}
-
-function renderLeaderboard() {
-  const scores = STUDENTS.map(s => {
-    const passed = TESTS.filter(t => data[s] && data[s][t]).length;
-    return { name: s, passed, pct: Math.round((passed / TESTS.length) * 100) };
-  }).sort((a,b) => b.passed - a.passed || a.name.localeCompare(b.name));
-
-  const rankEmoji = (i) => {
-    if (i === 0) return '🏆';
-    if (i === 1) return '🥇';
-    if (i === 2) return '🥈';
-    if (i === 3) return '🥉';
-    return `<span style="font-size:13px;color:var(--gray-400)">#${i+1}</span>`;
+  var Store = {
+    hasWS:function(){ try{ return !!(window.storage && typeof window.storage.get==="function"); }catch(e){ return false; } },
+    get:async function(k){ if(this.hasWS()){ try{ var r=await window.storage.get(k,true); return r?r.value:null; }catch(e){ return null; } } try{ return localStorage.getItem(k); }catch(e){ return null; } },
+    set:async function(k,v){ if(this.hasWS()){ try{ await window.storage.set(k,v,true); return true; }catch(e){ console.error(e); return false; } } try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } },
+    mode:function(){ return this.hasWS()?"shared":"local"; }
   };
 
-  const grid = document.getElementById('leaderboard');
-  grid.innerHTML = scores.map((s, i) => {
-    const rankClass = i < 3 ? ` rank-${i+1}` : '';
-    return `<div class="lb-row${rankClass}">
-      <div class="lb-rank">${rankEmoji(i)}</div>
-      <div class="lb-info">
-        <div class="lb-name">${s.name}</div>
-        <div class="lb-bar-track">
-          <div class="lb-bar-fill" style="width:${s.pct}%"></div>
-        </div>
-      </div>
-      <div class="lb-pct">${s.pct}%</div>
-    </div>`;
-  }).join('');
-}
+  function ensureShape(d){
+    d=d||{};
+    if(!d.className) d.className=state.className;
+    if(!Array.isArray(d.roster)) d.roster=[];
+    if(!Array.isArray(d.staff)) d.staff=["Brother Smith"];
+    if(!Array.isArray(d.skills)||!d.skills.length) d.skills=DEFAULT_SKILLS.slice();
+    if(!d.config) d.config={};
+    if(typeof d.config.ecPerCoach!=="number") d.config.ecPerCoach=1;
+    if(typeof d.config.ecPerProctor!=="number") d.config.ecPerProctor=1;
+    if(typeof d.config.instructorCode!=="string") d.config.instructorCode="";
+    if(!d.records||typeof d.records!=="object") d.records={};
+    return d;
+  }
+  async function loadAll(){ var raw=await Store.get(DATA_KEY); if(raw){ try{ state=ensureShape(JSON.parse(raw)); }catch(e){ state=ensureShape(state); } } else { state=ensureShape(state); await Store.set(DATA_KEY, JSON.stringify(state)); } }
+  async function saveAll(){ await Store.set(DATA_KEY, JSON.stringify(state)); }
+  async function saveStudentRecord(name){
+    var raw=await Store.get(DATA_KEY), latest=state;
+    if(raw){ try{ latest=ensureShape(JSON.parse(raw)); }catch(e){ latest=state; } }
+    latest.records[name]=state.records[name]; state=latest;
+    await Store.set(DATA_KEY, JSON.stringify(latest));
+  }
 
-// ─── Toggle Handler ───
-function toggleTest(student, test, val) {
-  if (!data[student]) data[student] = {};
-  data[student][test] = val;
-  renderLeaderboard();
-}
+  function isStudentName(v){ return v && v!=="—" && v!=="Instructor" && v!=="TA" && state.roster.indexOf(v)!==-1; }
+  function isStaff(v){ return !!v && state.staff.indexOf(v)!==-1; }
+  function getR(stu,sk){ var rec=state.records[stu]||(state.records[stu]={}); return rec[sk]||(rec[sk]={coachedBy:"",passedOffBy:"",date:"",q:"",activeBy:""}); }
+  function passedOff(name,sk){ var r=(state.records[name]||{})[sk]; return !!(r && r.passedOffBy && r.passedOffBy!=="—"); }
+  function eligibleCoaches(sk,exclude){ var l=state.staff.concat(["Instructor","TA"]); state.roster.forEach(function(n){ if(n!==exclude && passedOff(n,sk)) l.push(n); }); return l; }
+  function eligibleProctors(sk,student,coach){ var base=state.staff.concat(["Instructor","TA"]).concat(state.roster.filter(function(n){ return passedOff(n,sk); })); return base.filter(function(n){ return n!==student && n!==coach; }); }
 
-// ─── Init ───
-initFirebase();
+  function stageOf(r){
+    if(!r) return "none";
+    if(r.passedOffBy&&r.passedOffBy!=="—") return "done";
+    if(r.q==="passActive") return "passActive";
+    if(r.q==="passWait") return "passWait";
+    if(r.coachedBy&&r.coachedBy!=="—") return "ready";
+    if(r.q==="coachActive") return "coachActive";
+    if(r.q==="coachWait") return "coachWait";
+    return "none";
+  }
+
+  function statsFor(name){
+    var rec=state.records[name]||{}, passOffs=0;
+    state.skills.forEach(function(sk){ var r=rec[sk]; if(r&&r.passedOffBy&&r.passedOffBy!=="—") passOffs++; });
+    var coaching=0, proctoring=0;
+    Object.keys(state.records).forEach(function(stu){ var sr=state.records[stu]||{}; state.skills.forEach(function(sk){ var r=sr[sk]; if(!r) return; if(r.coachedBy===name) coaching++; if(r.passedOffBy===name) proctoring++; }); });
+    var ecC=coaching*(state.config.ecPerCoach||0), ecP=proctoring*(state.config.ecPerProctor||0);
+    return { passOffs:passOffs, coaching:coaching, proctoring:proctoring, ecCoach:ecC, ecProctor:ecP, ec:ecC+ecP };
+  }
+  function conflicts(){ var out=[]; Object.keys(state.records).forEach(function(stu){ var sr=state.records[stu]||{}; state.skills.forEach(function(sk){ var r=sr[sk]; if(!r) return; if(r.coachedBy && r.coachedBy===r.passedOffBy && isStudentName(r.coachedBy)) out.push({student:stu,skill:sk,who:r.coachedBy}); }); }); return out; }
+
+  function ensureAudio(){ try{ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx&&audioCtx.state==="suspended") audioCtx.resume(); }catch(e){} }
+  function playPing(){ if(!soundOn) return; ensureAudio(); if(!audioCtx) return; try{ var o=audioCtx.createOscillator(), g=audioCtx.createGain(), t=audioCtx.currentTime; o.type="sine"; o.frequency.setValueAtTime(880,t); o.frequency.exponentialRampToValueAtTime(1320,t+0.08); o.connect(g); g.connect(audioCtx.destination); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.22,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.4); o.start(t); o.stop(t+0.42); }catch(e){} }
+  function waitingCount(){ var c=0; state.roster.forEach(function(stu){ state.skills.forEach(function(sk){ var r=(state.records[stu]||{})[sk]; if(r&&(r.q==="coachWait"||r.q==="passWait")) c++; }); }); return c; }
+  function activeForStudent(name){ var c=0, rec=state.records[name]||{}; state.skills.forEach(function(sk){ var r=rec[sk]; if(r&&(r.q==="coachActive"||r.q==="passActive")) c++; }); return c; }
+  function pingCheck(){ if(currentView==="queues"){ var c=waitingCount(); if(c>lastWait) playPing(); lastWait=c; } else if(currentView==="student"&&selectedStudent){ var a=activeForStudent(selectedStudent); if(a>lastActiveSel) playPing(); lastActiveSel=a; } }
+  function buildChain(student, sk){
+    var back=[student], seen={}, cur=student, guard=0; seen[student]=1;
+    while(guard++<40){ var r=(state.records[cur]||{})[sk], c=r&&r.coachedBy; if(!c||c==="—") break; if(c==="Instructor"||c==="TA"){ back.unshift(c); break; } if(seen[c]) break; seen[c]=1; back.unshift(c); cur=c; }
+    var fwd=[]; state.roster.forEach(function(n){ var r=(state.records[n]||{})[sk]; if(r&&r.coachedBy===student) fwd.push(n); });
+    return { back:back, fwd:fwd };
+  }
+
+  var app=document.getElementById("app");
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function optlist(arr,sel){ return arr.map(function(o){ return '<option'+(o===sel?' selected':'')+'>'+esc(o)+'</option>'; }).join(""); }
+
+  // ---------- actions ----------
+  async function act(kind, student, skill, who){
+    var r=getR(student,skill);
+    if(kind==="reqCoach") r.q="coachWait";
+    else if(kind==="reqPass") r.q="passWait";
+    else if(kind==="cancel"){ r.q=""; r.activeBy=""; }
+    else if(kind==="claimCoach"){ if(!who){ alert("Pick who is coaching."); return; } r.q="coachActive"; r.activeBy=who; }
+    else if(kind==="doneCoach"){ r.coachedBy=r.activeBy||r.coachedBy; r.q=""; r.activeBy=""; }
+    else if(kind==="claimProct"){ if(!who){ alert("Pick who is proctoring."); return; } if(who===r.coachedBy){ alert("The proctor can't be the coach who taught them."); return; } r.q="passActive"; r.activeBy=who; }
+    else if(kind==="passYes"){ r.passedOffBy=r.activeBy||r.passedOffBy; r.q=""; r.activeBy=""; var d=new Date(); r.date=(d.getMonth()+1)+"/"+d.getDate(); }
+    else if(kind==="passNo"){ r.q=""; r.activeBy=""; }
+    await saveStudentRecord(student); render();
+  }
+
+  // ---------- staff console ----------
+  function staffConsoleHTML(me){
+    var coachWait=[],passWait=[],myCoach=[],myPass=[];
+    state.roster.forEach(function(stu){ state.skills.forEach(function(sk){ var r=(state.records[stu]||{})[sk]; if(!r) return; var s=stageOf(r);
+      if(s==="coachWait") coachWait.push({stu:stu,sk:sk,r:r});
+      else if(s==="passWait") passWait.push({stu:stu,sk:sk,r:r});
+      else if(s==="coachActive"&&r.activeBy===me) myCoach.push({stu:stu,sk:sk,r:r});
+      else if(s==="passActive"&&r.activeBy===me) myPass.push({stu:stu,sk:sk,r:r}); }); });
+    var h='<div class="card"><h2>Signed in as '+esc(me)+' — teacher</h2><p class="muted" style="margin-top:0">Pick students to coach or pass off. Staff don\'t appear on the leaderboard.</p></div>';
+    h+='<div class="card"><h2>✋ Pass-off queue — pick someone to pass off</h2>';
+    if(!passWait.length) h+='<div class="empty">No one is waiting to pass off.</div>';
+    passWait.forEach(function(it){ var coached=it.r.coachedBy, blocked=(coached===me);
+      h+='<div class="qrow"><span class="who">'+esc(it.stu)+'</span><span class="sk">· '+esc(it.sk)+'</span>'+(coached?' <span class="sk">(coached by '+esc(coached)+')</span>':'')+'<span class="claim">'+(blocked?'<span class="muted">you coached them — let someone else proctor</span>':'<button class="btn amber sm" data-act="claimProct" data-student="'+esc(it.stu)+'" data-skill="'+esc(it.sk)+'" data-who="'+esc(me)+'">Proctor this student</button>')+'</span></div>'; });
+    if(myPass.length){ h+='<h3>You\'re passing off now</h3>'; myPass.forEach(function(it){ h+='<div class="qrow"><span><b>'+esc(it.stu)+'</b></span><span class="sk">· '+esc(it.sk)+'</span><span class="claim"><button class="btn go sm" data-act="passYes" data-student="'+esc(it.stu)+'" data-skill="'+esc(it.sk)+'">Passed ✓</button><button class="btn sm" data-act="passNo" data-student="'+esc(it.stu)+'" data-skill="'+esc(it.sk)+'">Not yet</button></span></div>'; }); }
+    h+='</div>';
+    h+='<div class="card"><h2>🙋 Coaching queue — pick someone to coach</h2>';
+    if(!coachWait.length) h+='<div class="empty">No one is waiting for a coach.</div>';
+    coachWait.forEach(function(it){ h+='<div class="qrow"><span class="who">'+esc(it.stu)+'</span><span class="sk">· '+esc(it.sk)+'</span><span class="claim"><button class="btn go sm" data-act="claimCoach" data-student="'+esc(it.stu)+'" data-skill="'+esc(it.sk)+'" data-who="'+esc(me)+'">Coach this student</button></span></div>'; });
+    if(myCoach.length){ h+='<h3>You\'re coaching now</h3>'; myCoach.forEach(function(it){ h+='<div class="qrow"><span><b>'+esc(it.stu)+'</b></span><span class="sk">· '+esc(it.sk)+'</span><span class="claim"><button class="btn primary sm" data-act="doneCoach" data-student="'+esc(it.stu)+'" data-skill="'+esc(it.sk)+'">Done coaching</button></span></div>'; }); }
+    h+='</div>';
+    return h;
+  }
+
+  // ---------- student view ----------
+  function renderStudent(){
+    if(!state.roster.length){ app.innerHTML='<div class="card"><h2>No class list yet</h2><p class="muted">Go to <b>Setup</b> and paste your roster.</p></div>'; return; }
+    var rosterOpts=state.roster.map(function(n){ return '<option'+(n===selectedStudent?' selected':'')+'>'+esc(n)+'</option>'; }).join("");
+    var staffOpts=state.staff.map(function(n){ return '<option'+(n===selectedStudent?' selected':'')+'>'+esc(n)+'</option>'; }).join("");
+    var html='<div class="card"><label class="fld">Who are you?</label><select data-change="whoami"><option value="">— select your name —</option><optgroup label="Students">'+rosterOpts+'</optgroup>'+(staffOpts?'<optgroup label="Staff">'+staffOpts+'</optgroup>':'')+'</select></div>';
+    if(selectedStudent && isStaff(selectedStudent)){ app.innerHTML=html+staffConsoleHTML(selectedStudent); return; }
+    if(selectedStudent){
+      var st=statsFor(selectedStudent);
+      html+='<div class="statbox">'+
+        '<div class="stat"><div class="n">'+st.passOffs+' / '+state.skills.length+'</div><div class="l">Passed off</div></div>'+
+        '<div class="stat"><div class="n">'+st.coaching+'</div><div class="l">Coached ('+st.ecCoach+' EC)</div></div>'+
+        '<div class="stat"><div class="n">'+st.proctoring+'</div><div class="l">Proctored ('+st.ecProctor+' EC)</div></div>'+
+        '<div class="stat"><div class="n">'+st.ec+'</div><div class="l">Total extra credit</div></div></div>';
+      html+='<div class="card"><h2>Your tests</h2><div class="grid-wrap"><table><thead><tr><th>Skill</th><th>Status</th><th>Coach / proctor</th><th>What to do</th></tr></thead><tbody>';
+      state.skills.forEach(function(sk){
+        var r=getR(selectedStudent,sk), s=stageOf(r), pill="", info="", action="";
+        var dS='data-student="'+esc(selectedStudent)+'" data-skill="'+esc(sk)+'"';
+        if(s==="none"){ pill='<span class="pill p-none">not started</span>'; action='<button class="btn go sm" data-act="reqCoach" '+dS+'>Request a coach</button> <button class="btn amber sm" data-act="reqPass" '+dS+'>I\'m ready to pass off</button>'; }
+        else if(s==="coachWait"){ pill='<span class="pill p-wait">waiting for coach</span>'; action='<span class="muted">in the coach queue…</span> <button class="btn sm" data-act="cancel" '+dS+'>Cancel</button>'; }
+        else if(s==="coachActive"){ pill='<span class="pill p-prog">being coached</span>'; info='by <b>'+esc(r.activeBy)+'</b>'; action='<span class="muted">your coach will mark this done</span>'; }
+        else if(s==="ready"){ pill='<span class="pill p-ready">coached</span>'; info='by <b>'+esc(r.coachedBy)+'</b>'; action='<button class="btn amber sm" data-act="reqPass" '+dS+'>I\'m ready to pass off</button>'; }
+        else if(s==="passWait"){ pill='<span class="pill p-wait">waiting to pass off</span>'; info=r.coachedBy?'coached by <b>'+esc(r.coachedBy)+'</b>':''; action='<span class="muted">in the pass-off queue…</span> <button class="btn sm" data-act="cancel" '+dS+'>Cancel</button>'; }
+        else if(s==="passActive"){ pill='<span class="pill p-prog">passing off</span>'; info='with <b>'+esc(r.activeBy)+'</b>'; action='<span class="muted">proctor will record the result</span>'; }
+        else if(s==="done"){ pill='<span class="pill p-done">✓ passed off</span>'; info='by <b>'+esc(r.passedOffBy)+'</b>'+(r.coachedBy?', coached by '+esc(r.coachedBy):''); action='<span class="muted">now you can coach others on this →</span>'; }
+        html+='<tr><td><b>'+esc(sk)+'</b></td><td>'+pill+'</td><td>'+info+'</td><td><div class="actions">'+action+'</div></td></tr>';
+      });
+      html+='</tbody></table></div></div>';
+      var chainRows="";
+      state.skills.forEach(function(sk){
+        var r=getR(selectedStudent,sk), ch=buildChain(selectedStudent,sk);
+        var hasData=(r.coachedBy&&r.coachedBy!=="—")||ch.fwd.length||(r.passedOffBy&&r.passedOffBy!=="—");
+        if(!hasData) return;
+        var parts=ch.back.map(function(p){ return p===selectedStudent?'<b>'+esc(p)+' (you)</b>':esc(p); }).join(" → ");
+        if(ch.fwd.length) parts+=' → <span style="color:var(--green);font-weight:700">taught '+ch.fwd.map(esc).join(", ")+'</span>';
+        var po=(r.passedOffBy&&r.passedOffBy!=="—")?' <span class="muted">· passed off by '+esc(r.passedOffBy)+'</span>':'';
+        chainRows+='<div style="padding:8px 0;border-bottom:1px solid #eef0f2;font-size:13px"><b>'+esc(sk)+'</b><br>🔗 '+parts+po+'</div>';
+      });
+      if(chainRows) html+='<div class="card"><h2>Your relay chains</h2><p class="muted" style="margin-top:0">Who taught you on each test, traced back to the first demo — and who you taught forward.</p>'+chainRows+'</div>';
+    }
+    app.innerHTML=html;
+  }
+
+  // ---------- queues view ----------
+  function renderQueues(){
+    if(!state.roster.length){ app.innerHTML='<div class="card"><p class="muted">Add your roster in Setup first.</p></div>'; return; }
+    var coachWait=[],coachActive=[],passWait=[],passActive=[];
+    state.roster.forEach(function(stu){ state.skills.forEach(function(sk){ var r=(state.records[stu]||{})[sk]; if(!r) return; var s=stageOf(r); if(s==="coachWait")coachWait.push({stu:stu,sk:sk,r:r}); else if(s==="coachActive")coachActive.push({stu:stu,sk:sk,r:r}); else if(s==="passWait")passWait.push({stu:stu,sk:sk,r:r}); else if(s==="passActive")passActive.push({stu:stu,sk:sk,r:r}); }); });
+    var uid=0;
+    var html='<div class="card"><h2>🙋 Coaching queue</h2>';
+    if(!coachWait.length) html+='<div class="empty">No one is waiting for a coach.</div>';
+    coachWait.forEach(function(it){ var id="csel"+(uid++); var opts=eligibleCoaches(it.sk,it.stu); html+='<div class="qrow"><span class="who">'+esc(it.stu)+'</span><span class="sk">· '+esc(it.sk)+'</span><span class="claim"><span class="muted">coach:</span><select id="'+id+'">'+optlist(opts,opts[0])+'</select><button class="btn go sm" data-act="claimCoach" data-student="'+esc(it.stu)+'" data-skill="'+esc(it.sk)+'" data-sel="'+id+'">Claim</button></span></div>'; });
+    html+='<h3>Being coached now</h3>';
+    if(!coachActive.length) html+='<div class="empty">—</div>';
+    coachActive.forEach(function(it){ html+='<div class="qrow"><span><b>'+esc(it.r.activeBy)+'</b> is coaching <b>'+esc(it.stu)+'</b></span><span class="sk">· '+esc(it.sk)+'</span><span class="claim"><button class="btn primary sm" data-act="doneCoach" data-student="'+esc(it.stu)+'" data-skill="'+esc(it.sk)+'">Done coaching</button></span></div>'; });
+    html+='</div>';
+
+    html+='<div class="card"><h2>✋ Pass-off queue</h2>';
+    if(!passWait.length) html+='<div class="empty">No one is waiting to pass off.</div>';
+    passWait.forEach(function(it){ var id="psel"+(uid++); var opts=eligibleProctors(it.sk,it.stu,it.r.coachedBy); var cb=it.r.coachedBy?' <span class="sk">(coached by '+esc(it.r.coachedBy)+')</span>':''; html+='<div class="qrow"><span class="who">'+esc(it.stu)+'</span><span class="sk">· '+esc(it.sk)+'</span>'+cb+'<span class="claim"><span class="muted">proctor:</span><select id="'+id+'">'+optlist_or_empty(opts)+'</select><button class="btn amber sm" data-act="claimProct" data-student="'+esc(it.stu)+'" data-skill="'+esc(it.sk)+'" data-sel="'+id+'">Claim</button></span></div>'; });
+    html+='<h3>Passing off now</h3>';
+    if(!passActive.length) html+='<div class="empty">—</div>';
+    passActive.forEach(function(it){ html+='<div class="qrow"><span><b>'+esc(it.r.activeBy)+'</b> is passing off <b>'+esc(it.stu)+'</b></span><span class="sk">· '+esc(it.sk)+'</span><span class="claim"><button class="btn go sm" data-act="passYes" data-student="'+esc(it.stu)+'" data-skill="'+esc(it.sk)+'">Passed ✓</button><button class="btn sm" data-act="passNo" data-student="'+esc(it.stu)+'" data-skill="'+esc(it.sk)+'">Not yet</button></span></div>'; });
+    html+='</div>';
+    app.innerHTML=html;
+  }
+  function optlist_or_empty(opts){ if(!opts.length) return '<option value="">(no eligible proctor yet)</option>'; return optlist(opts,opts[0]); }
+
+  function gate(){ if(!state.config.instructorCode) return true; if(unlocked) return true; var c=prompt("Instructor code:"); if(c===state.config.instructorCode){ unlocked=true; return true; } alert("Incorrect code."); return false; }
+
+  // ---------- dashboard ----------
+  function renderDashboard(){
+    if(!gate()){ currentView="student"; setActive(); renderStudent(); return; }
+    if(!state.roster.length){ app.innerHTML='<div class="card"><p class="muted">Add your roster in Setup first.</p></div>'; return; }
+    var total=state.skills.length;
+    var prog=state.roster.map(function(n){ return {name:n, po:statsFor(n).passOffs}; });
+    prog.sort(function(a,b){ return b.po-a.po || a.name.localeCompare(b.name); });
+    var html='<div class="card"><h2>Class progress</h2>';
+    prog.forEach(function(p){ var pct=total?Math.round(p.po/total*100):0; html+='<div class="prow"><span class="pname">'+esc(p.name)+'</span><div class="pbar"><div class="pfill'+(pct<40?' low':'')+'" data-pct="'+pct+'" style="width:0%"></div></div><span class="pcount">'+p.po+' / '+total+'</span></div>'; });
+    html+='</div>';
+    html+='<div class="card"><h2>Status grid</h2><div class="grid-wrap"><table class="matrix"><thead><tr><th>Student</th><th class="skill">Tests passed</th>';
+    state.skills.forEach(function(sk){ html+='<th class="skill">'+esc(sk)+'</th>'; });
+    html+='</tr></thead><tbody>';
+    state.roster.forEach(function(n){ var rec=state.records[n]||{}, st=statsFor(n); html+='<tr><td class="name">'+esc(n)+'</td><td class="cell">'+st.passOffs+'</td>';
+      state.skills.forEach(function(sk){ var r=rec[sk], s=stageOf(r), m="", t=r?("coached by "+(r.coachedBy||"—")+", passed off by "+(r.passedOffBy||"—")):"";
+        if(s==="done")m='<span class="ok">✓</span>'; else if(s==="ready")m='<span class="half">◑</span>'; else if(s==="coachWait"||s==="passWait"||s==="coachActive"||s==="passActive")m='<span class="waitc">•</span>';
+        html+='<td class="cell" title="'+esc(t)+'">'+m+'</td>'; });
+      html+='</tr>'; });
+    html+='</tbody></table></div><p class="muted" style="margin-top:6px">✓ passed off · ◑ coached · • in a queue / in progress · hover for names.</p></div>';
+
+    var cf=conflicts();
+    if(cf.length){ html+='<div class="card"><h2>⚠ Coach = proctor flags</h2>'; cf.forEach(function(c){ html+='<div class="flag"><b>'+esc(c.student)+'</b> was coached <i>and</i> passed off by <b>'+esc(c.who)+'</b> on <b>'+esc(c.skill)+'</b> — re-check independently.</div>'; }); html+='</div>'; }
+
+    var rows=state.roster.map(function(n){ var s=statsFor(n); s.name=n; return s; });
+    rows.sort(function(a,b){ return b.passOffs-a.passOffs || b.ec-a.ec || a.name.localeCompare(b.name); });
+    html+='<div class="card"><h2>🏆 Leaderboard</h2><div class="grid-wrap"><table><thead><tr><th></th><th>Student</th><th>Passed off</th><th>Coached</th><th>Proctored</th><th>Extra credit</th></tr></thead><tbody>';
+    rows.forEach(function(r,i){ var rc=i<3?' r'+(i+1):''; html+='<tr><td><span class="rank'+rc+'">'+(i+1)+'</span></td><td><b>'+esc(r.name)+'</b></td><td>'+r.passOffs+'</td><td>'+r.coaching+'</td><td>'+r.proctoring+'</td><td><b>'+r.ec+'</b></td></tr>'; });
+    html+='</tbody></table></div><div style="margin-top:12px"><button class="btn" id="csvBtn">⬇ Export CSV</button></div></div>';
+
+    // manual fix
+    html+='<div class="card"><h2>Manual entry / fix</h2><label class="fld">Pick a student to edit directly</label><select data-change="manualpick"><option value="">—</option>'+
+      state.roster.map(function(n){ return '<option'+(n===manualStudent?' selected':'')+'>'+esc(n)+'</option>'; }).join("")+'</select>';
+    if(manualStudent){ html+='<div class="grid-wrap" style="margin-top:10px"><table><thead><tr><th>Skill</th><th>Coached by</th><th>Passed off by</th></tr></thead><tbody>';
+      state.skills.forEach(function(sk){ var r=getR(manualStudent,sk); var ppl=["—"].concat(state.staff).concat(["Instructor","TA"]).concat(state.roster.filter(function(x){return x!==manualStudent;}));
+        html+='<tr><td><b>'+esc(sk)+'</b></td><td><select data-change="manual" data-student="'+esc(manualStudent)+'" data-skill="'+esc(sk)+'" data-f="coachedBy">'+optlist(ppl,r.coachedBy||"—")+'</select></td><td><select data-change="manual" data-student="'+esc(manualStudent)+'" data-skill="'+esc(sk)+'" data-f="passedOffBy">'+optlist(ppl,r.passedOffBy||"—")+'</select></td></tr>'; });
+      html+='</tbody></table></div>'; }
+    html+='</div>';
+    app.innerHTML=html;
+    requestAnimationFrame(function(){ Array.prototype.forEach.call(app.querySelectorAll(".pfill"),function(el){ el.style.width=(el.getAttribute("data-pct")||0)+"%"; }); });
+    var csv=document.getElementById("csvBtn"); if(csv) csv.addEventListener("click", exportCSV);
+  }
+
+  function exportCSV(){
+    var lines=[["Student","Skill","Status","CoachedBy","PassedOffBy","Date"]];
+    state.roster.forEach(function(n){ var rec=state.records[n]||{}; state.skills.forEach(function(sk){ var r=rec[sk], s=stageOf(r); lines.push([n,sk,s,(r&&r.coachedBy)||"",(r&&r.passedOffBy)||"",(r&&r.date)||""]); }); });
+    lines.push([]); lines.push(["Student","PassOffs","Coached","Proctored","CoachEC","ProctorEC","TotalEC"]);
+    state.roster.forEach(function(n){ var s=statsFor(n); lines.push([n,s.passOffs,s.coaching,s.proctoring,s.ecCoach,s.ecProctor,s.ec]); });
+    var csv=lines.map(function(row){ return row.map(function(c){ var v=String(c==null?"":c); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }).join(","); }).join("\n");
+    try{ var b=new Blob([csv],{type:"text/csv"}), u=URL.createObjectURL(b), a=document.createElement("a"); a.href=u; a.download="ce210_passoffs.csv"; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(u); a.remove(); },100); }
+    catch(e){ alert("Couldn't auto-download here — copy from the tables instead."); }
+  }
+
+  // ---------- setup ----------
+  function renderSetup(){
+    if(!gate()){ currentView="student"; setActive(); renderStudent(); return; }
+    var html='<div class="card"><h2>Class setup</h2>'+
+      '<label class="fld">Class title</label><input type="text" id="setTitle" value="'+esc(state.className)+'">'+
+      '<div class="row2"><div><label class="fld">Roster — one name per line</label><textarea id="setRoster">'+esc(state.roster.join("\n"))+'</textarea></div>'+
+      '<div><label class="fld">Skills / pass-offs — one per line</label><textarea id="setSkills">'+esc(state.skills.join("\n"))+'</textarea></div></div>'+
+      '<label class="fld">Staff (teachers / TAs) — one per line · selectable in “who are you,” can coach &amp; proctor, never on the leaderboard</label><textarea id="setStaff" style="min-height:64px">'+esc(state.staff.join("\n"))+'</textarea>'+
+      '<div class="row2"><div><label class="fld">Extra credit per person COACHED</label><input type="number" id="setECc" step="0.5" value="'+esc(state.config.ecPerCoach)+'"></div>'+
+      '<div><label class="fld">Extra credit per person PROCTORED</label><input type="number" id="setECp" step="0.5" value="'+esc(state.config.ecPerProctor)+'"></div>'+
+      '<div><label class="fld">Instructor code (optional — locks Dashboard &amp; Setup)</label><input type="text" id="setCode" value="'+esc(state.config.instructorCode)+'"></div></div>'+
+      '<div style="margin-top:16px"><button class="btn primary" id="saveSetup">Save setup</button> <button class="btn" id="clearRecs" style="margin-left:8px">Clear records (keep roster)</button> <button class="btn danger" id="eraseAll" style="margin-left:8px">Erase everything</button></div>'+
+      '<p class="muted" style="margin-top:10px">Storage mode: <b>'+(Store.mode()==="shared"?"shared (everyone with the link shares one dataset)":"local (this browser only)")+'</b>. Only students who have <b>passed off</b> a skill (plus Instructor / TA) appear as eligible coaches or proctors for it.</p></div>';
+    app.innerHTML=html;
+    document.getElementById("saveSetup").addEventListener("click", async function(){
+      state.className=document.getElementById("setTitle").value||state.className;
+      state.roster=document.getElementById("setRoster").value.split("\n").map(function(s){return s.trim();}).filter(Boolean);
+      state.skills=document.getElementById("setSkills").value.split("\n").map(function(s){return s.trim();}).filter(Boolean);
+      state.staff=document.getElementById("setStaff").value.split("\n").map(function(s){return s.trim();}).filter(Boolean);
+      state.config.ecPerCoach=parseFloat(document.getElementById("setECc").value)||0;
+      state.config.ecPerProctor=parseFloat(document.getElementById("setECp").value)||0;
+      state.config.instructorCode=document.getElementById("setCode").value.trim();
+      var raw=await Store.get(DATA_KEY); if(raw){ try{ var latest=ensureShape(JSON.parse(raw)); state.records=latest.records; }catch(e){} }
+      await saveAll(); document.getElementById("title").textContent=state.className; alert("Saved."); renderSetup();
+    });
+    document.getElementById("clearRecs").addEventListener("click", async function(){ if(confirm("Clear all pass-off records but KEEP the roster and skills?")){ state.records={}; await saveAll(); selectedStudent=""; manualStudent=""; renderSetup(); } });
+    document.getElementById("eraseAll").addEventListener("click", async function(){ if(confirm("Erase EVERYTHING (roster, skills, and records)?")){ state=ensureShape({}); await saveAll(); selectedStudent=""; manualStudent=""; renderSetup(); } });
+  }
+
+  function render(){ document.getElementById("title").textContent=state.className;
+    if(currentView==="student") renderStudent();
+    else if(currentView==="queues") renderQueues();
+    else if(currentView==="dashboard") renderDashboard();
+    else renderSetup();
+    pingCheck();
+  }
+  function setActive(){ Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(t){ t.classList.toggle("active", t.getAttribute("data-view")===currentView); }); }
+
+  // delegated events (attached once)
+  app.addEventListener("click", function(e){ ensureAudio(); var b=e.target.closest&&e.target.closest("[data-act]"); if(!b) return; var kind=b.getAttribute("data-act"), stu=b.getAttribute("data-student"), sk=b.getAttribute("data-skill"), who=""; var sel=b.getAttribute("data-sel"); if(sel){ var el=document.getElementById(sel); who=el?el.value:""; } else if(b.getAttribute("data-who")){ who=b.getAttribute("data-who"); } act(kind,stu,sk,who); });
+  app.addEventListener("change", function(e){ var el=e.target, ch=el.getAttribute&&el.getAttribute("data-change"); if(!ch) return;
+    if(ch==="whoami"){ selectedStudent=el.value; lastActiveSel=activeForStudent(selectedStudent); render(); }
+    else if(ch==="manualpick"){ manualStudent=el.value; render(); }
+    else if(ch==="manual"){ var stu=el.getAttribute("data-student"), sk=el.getAttribute("data-skill"), f=el.getAttribute("data-f"); var r=getR(stu,sk); r[f]=el.value; if(f==="passedOffBy"&&el.value!=="—"&&!r.date){ var d=new Date(); r.date=(d.getMonth()+1)+"/"+d.getDate(); } saveStudentRecord(stu).then(render); }
+  });
+  Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(t){ t.addEventListener("click",function(){ ensureAudio(); currentView=this.getAttribute("data-view"); setActive(); render(); }); });
+  document.getElementById("refreshBtn").addEventListener("click", async function(){ await loadAll(); render(); });
+  document.getElementById("soundBtn").addEventListener("click", function(){ soundOn=!soundOn; this.textContent="🔔 Sound: "+(soundOn?"on":"off"); ensureAudio(); if(soundOn) playPing(); });
+
+  // gentle live refresh for the coordination views
+  setInterval(async function(){ if(currentView!=="queues"&&currentView!=="student") return; var ae=document.activeElement; if(ae&&/^(SELECT|INPUT|TEXTAREA)$/.test(ae.tagName)) return; await loadAll(); render(); }, 9000);
+
+  (async function(){ var mb=document.getElementById("modebar"); await loadAll(); lastWait=waitingCount();
+    if(Store.mode()==="shared"){ mb.className="modebar mode-shared"; mb.innerHTML="<b>Shared mode:</b> everyone who opens this link sees and updates the same queues and data. (Name selection is honor-system — no passwords.)"; }
+    else { mb.className="modebar mode-local"; mb.innerHTML="<b>Local mode:</b> data is saved in <i>this browser only</i> — perfect as a single pass-off station. To sync across devices, run it as a shared link."; }
+    render();
+  })();
+})();
 </script>
 </body>
 </html>
