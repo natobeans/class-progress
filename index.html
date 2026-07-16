@@ -3,401 +3,1313 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CE 210 — Pass-Off Tracker</title>
+<title>CE 210 · The Materials Inspector</title>
 <style>
-  :root{--ink:#16191f;--blue:#1f5fb0;--green:#1c7a4d;--amber:#b5731f;--red:#b3261e;--line:#dde1e6;--muted:#5b636d;--bg:#f6f7f8;--gold:#f2c200;}
-  *{box-sizing:border-box;}
-  body{font-family:Lato,'Helvetica Neue',Arial,sans-serif;color:var(--ink);line-height:1.45;margin:0;background:#fff;}
-  .wrap{max-width:1020px;margin:0 auto;padding:18px 16px 70px;}
-  header{border-bottom:3px solid var(--ink);padding-bottom:10px;}
-  .eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);font-weight:700;}
-  h1{margin:4px 0 2px;font-size:22px;}
-  .sub{color:var(--muted);font-size:13px;}
-  .modebar{font-size:12px;padding:7px 12px;border-radius:5px;margin:10px 0;}
-  .mode-shared{background:#e6f3ec;border:1px solid #cfe0d6;color:#1c5b3c;}
-  .mode-local{background:#fdf8f0;border:1px solid #ecdcc0;color:#7a5114;}
-  nav{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 16px;align-items:center;}
-  .tab{font:inherit;font-size:13px;font-weight:700;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:6px;padding:8px 15px;cursor:pointer;}
-  .tab.active{background:var(--ink);color:#fff;border-color:var(--ink);}
-  .btn{font:inherit;font-size:12.5px;font-weight:700;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:6px;padding:7px 12px;cursor:pointer;}
-  .btn:hover{background:var(--bg);}
-  .btn.primary{background:var(--blue);color:#fff;border-color:var(--blue);}
-  .btn.go{background:var(--green);color:#fff;border-color:var(--green);}
-  .btn.amber{background:var(--amber);color:#fff;border-color:var(--amber);}
-  .btn.danger{background:#fff;color:var(--red);border-color:#e7b9b4;}
-  .btn.sm{padding:5px 10px;font-size:12px;}
-  .card{border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px;}
-  .card h2{font-size:15px;margin:0 0 4px;}
-  .card h3{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:16px 0 8px;}
-  label.fld{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;margin:10px 0 4px;}
-  select,input[type=text],input[type=number],textarea{font:inherit;font-size:13.5px;padding:7px 9px;border:1px solid var(--line);border-radius:5px;width:100%;background:#fff;color:var(--ink);}
-  textarea{min-height:120px;resize:vertical;}
-  table{width:100%;border-collapse:collapse;font-size:13px;}
-  th,td{padding:7px 9px;border-bottom:1px solid #eef0f2;text-align:left;vertical-align:middle;}
-  th{background:var(--bg);font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);}
-  .pill{display:inline-block;font-size:11px;font-weight:700;border-radius:20px;padding:2px 9px;}
-  .p-done{background:#e6f3ec;color:var(--green);} .p-ready{background:#fdf3e3;color:var(--amber);}
-  .p-prog{background:#eef4fb;color:var(--blue);} .p-wait{background:#fff7e0;color:#9a7b14;} .p-none{background:#f1f3f5;color:#9aa1a8;}
-  .muted{color:var(--muted);font-size:12.5px;}
-  .grid-wrap{overflow-x:auto;}
-  table.matrix th.skill{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;font-size:10.5px;height:190px;vertical-align:bottom;text-align:center;padding:6px 2px;}
-  table.matrix td.cell{text-align:center;font-size:14px;} table.matrix td.name{font-weight:700;white-space:nowrap;}
-  .ok{color:var(--green);font-weight:700;} .half{color:var(--blue);} .waitc{color:var(--amber);}
-  .flag{background:#fbe9e7;border:1px solid #f0c9c4;border-left:5px solid var(--red);border-radius:6px;padding:10px 13px;font-size:13px;color:#7a241c;margin-bottom:8px;}
-  .rank{display:inline-block;width:24px;font-weight:700;color:var(--muted);}
-  .rank.r1{color:#c79a00;} .rank.r2{color:#8a929b;} .rank.r3{color:#b5731f;}
-  .prow{display:flex;align-items:center;gap:12px;padding:6px 0;}
-  .pname{flex:0 0 170px;font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .pbar{flex:1;background:#eef0f2;border-radius:20px;height:14px;overflow:hidden;}
-  .pfill{height:100%;background:linear-gradient(90deg,#1c7a4d,#3aa873);border-radius:20px;transition:width .7s ease;}
-  .pfill.low{background:linear-gradient(90deg,#b5731f,#d59a3f);}
-  .pcount{flex:0 0 60px;text-align:right;font-size:12.5px;color:var(--muted);}
-  .loading{padding:40px;text-align:center;color:var(--muted);}
-  .row2{display:flex;gap:14px;flex-wrap:wrap;} .row2>div{flex:1 1 220px;}
-  .statbox{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
-  .stat{flex:1 1 120px;border:1px solid var(--line);border-radius:8px;padding:10px 13px;}
-  .stat .n{font-size:22px;font-weight:700;} .stat .l{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);}
-  .qrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 0;border-bottom:1px solid #eef0f2;}
-  .qrow .who{font-weight:700;} .qrow .sk{color:var(--muted);font-size:12.5px;}
-  .qrow .claim{display:flex;gap:6px;align-items:center;margin-left:auto;}
-  .qrow select{width:auto;min-width:130px;}
-  .empty{color:#9aa1a8;font-size:13px;padding:8px 0;}
-  .actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+:root{ --ink:#16191f; --blue:#1f5fb0; --green:#1c7a4d; --amber:#b5731f; --gold:#f2c200; --panel:#1a1f29; }
+*{box-sizing:border-box; margin:0; padding:0;}
+body{background:radial-gradient(1200px 700px at 50% -10%, #1c2230, #0b0d12); color:#e8e6df;
+ font-family:'Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;
+ display:flex; flex-direction:column; align-items:center; min-height:100vh;}
+#wrap{width:992px; max-width:100vw;}
+/* ---------- dashboard ---------- */
+#dash{background:linear-gradient(#1d2330,#151a24); border:1px solid #303a4c; border-bottom:none; border-radius:14px 14px 0 0; padding:10px 14px 8px; box-shadow:0 10px 30px #0009;}
+#dashtop{display:flex; justify-content:space-between; align-items:center; margin-bottom:7px;}
+#dashtitle{font-weight:800; color:var(--gold); font-size:14px; letter-spacing:2.5px; font-family:'Courier New',monospace;}
+#count{font-size:12.5px; color:#9aa3ad; white-space:nowrap;}
+#pbarw{flex:1; height:12px; background:#0d0f14; border:1px solid #3a4150; border-radius:7px; margin:0 14px; overflow:hidden;}
+#pbar{height:100%; width:0%; background:linear-gradient(90deg,var(--green),var(--gold)); transition:width .6s; box-shadow:0 0 10px #f2c20055;}
+#chips{display:flex; flex-wrap:wrap; gap:4px;}
+.chip{position:relative; font-size:10px; padding:3px 7px 5px; border:1px solid #39435a; border-radius:9px; color:#8d97a5; background:#1b2130; white-space:nowrap; transition:all .5s; overflow:hidden;}
+.chip .mini{position:absolute; left:0; bottom:0; height:3px; width:0%; background:linear-gradient(90deg,#1f5fb0,var(--gold)); transition:width .5s;}
+.chip.done{border-color:var(--green); color:#c8f5da; background:#123322; box-shadow:0 0 8px #1c7a4d77;}
+.chip.done .mini{width:100% !important; background:var(--green);}
+.chip .ring{display:inline-block; width:8px; height:8px; border-radius:50%; border:2px solid #4a5262; margin-right:4px; vertical-align:-1px; transition:all .5s;}
+.chip.done .ring{border-color:var(--gold); background:var(--green);}
+/* ---------- stage ---------- */
+#stage{position:relative; width:992px; height:544px; background:#000; border:1px solid #303a4c; overflow:hidden;}
+canvas{display:block;}
+#hint{position:absolute; bottom:10px; left:50%; transform:translateX(-50%); background:#141925ee; border:1px solid #3a4150; border-radius:20px; padding:6px 16px; font-size:13px; color:var(--gold); display:none; pointer-events:none; box-shadow:0 4px 14px #0008;}
+#toast{position:absolute; top:14px; left:50%; transform:translateX(-50%); background:#12321fee; border:1px solid var(--green); border-radius:20px; padding:7px 18px; font-size:13.5px; color:#c8f5da; display:none; z-index:5; box-shadow:0 6px 18px #000a;}
+#locname{position:absolute; top:12px; left:14px; background:#141925cc; border:1px solid #3a4150; border-radius:16px; padding:4px 12px; font-size:11px; color:#aab3bd; letter-spacing:1.5px;}
+/* ---------- inventory ---------- */
+#inv{background:linear-gradient(#151a24,#10141c); border:1px solid #303a4c; border-top:none; border-radius:0 0 14px 14px; padding:7px 14px; display:flex; align-items:center; gap:8px; min-height:44px;}
+#invlabel{font-size:11px; color:#7d8590; letter-spacing:1.5px; font-weight:700;}
+.item{background:#221d12; border:1px solid var(--amber); border-radius:14px; padding:3px 10px; font-size:11.5px; color:#f3d9a8;}
+#keys{margin-left:auto; font-size:11px; color:#5d6570;}
+/* ---------- dialogue ---------- */
+#dlg{position:absolute; left:0; right:0; bottom:0; background:linear-gradient(#171c27f8,#10141cf8); border-top:3px solid var(--gold); padding:14px 22px 12px; display:none; z-index:10; min-height:186px; box-shadow:0 -12px 30px #000a;}
+#dlghead{display:flex; align-items:center; gap:12px; margin-bottom:7px;}
+#portrait{width:52px; height:60px; border-radius:10px; background:#0d1118; border:1px solid #3a4150;}
+#dlgname{font-weight:800; color:var(--gold); font-size:15px; letter-spacing:1px;}
+#dlgrole{font-size:11px; color:#7d8590; margin-top:1px;}
+#dlgtext{font-size:15.5px; line-height:1.55; color:#f2f0e8; min-height:52px; white-space:pre-wrap;}
+#dlgopts{margin-top:10px; display:flex; flex-direction:column; gap:6px;}
+.opt{background:#1c2331; border:1px solid #3a4560; border-radius:9px; padding:8px 14px; font-size:13.5px; color:#e2e7ee; cursor:pointer; text-align:left; font-family:inherit; transition:all .12s; text-decoration:none; display:block;}
+.opt:hover{border-color:var(--gold); color:var(--gold); transform:translateX(5px);}
+.opt.good{border-color:var(--green); color:#c8f5da; background:#123322;}
+.opt.bad{border-color:#b3261e; color:#f3b8b3; background:#33150f;}
+#dlgnext{margin-top:10px; text-align:right; font-size:12.5px; color:var(--gold); cursor:pointer; animation:blink 1.2s infinite;}
+@keyframes blink{50%{opacity:.25;}}
+/* calc widget */
+#calcbox{margin-top:8px; background:#10151f; border:1px solid #3a4560; border-radius:10px; padding:10px 14px;}
+#calceq{font-family:Cambria,Georgia,'Times New Roman',serif; font-size:17px; color:#f2e9c8; text-align:center; padding:6px 0 10px; border-bottom:1px dashed #39435a; margin-bottom:10px;}
+#calcrow{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+#calcin{flex:1; min-width:140px; background:#0b0f16; border:1px solid #4a5262; border-radius:8px; color:#fff; font-size:16px; padding:8px 12px; font-family:inherit;}
+#calcin:focus{outline:none; border-color:var(--gold);}
+#calcunit{color:#9aa3ad; font-size:14px;}
+#calcbtn{background:var(--gold); color:#16191f; border:none; border-radius:8px; padding:9px 18px; font-size:14px; font-weight:800; cursor:pointer; font-family:inherit;}
+#calcbtn:hover{filter:brightness(1.1);}
+#calcmsg{margin-top:8px; font-size:13px; min-height:18px;}
+/* ---------- overlays ---------- */
+.overlay{position:absolute; inset:0; background:#0b0d12f2; z-index:20; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:30px;}
+.overlay h1{color:var(--gold); font-size:32px; letter-spacing:3px; margin-bottom:10px; text-shadow:0 4px 0 #000, 0 0 30px #f2c20033; font-family:'Courier New',monospace;}
+.overlay h2{color:#aab3bd; font-size:14.5px; font-weight:400; margin-bottom:22px; max-width:660px; line-height:1.65;}
+.bigbtn{background:#1c2331; border:2px solid var(--gold); color:var(--gold); font-family:inherit; font-size:15px; font-weight:700; padding:11px 28px; border-radius:10px; cursor:pointer; margin:6px; letter-spacing:1px;}
+.bigbtn:hover{background:var(--gold); color:#16191f;}
+#charrow{display:flex; gap:30px; margin:14px 0 20px;}
+.charpick{cursor:pointer; padding:12px 20px; border:2px solid #39435a; border-radius:14px; background:#141925;}
+.charpick:hover, .charpick.sel{border-color:var(--gold); box-shadow:0 0 18px #f2c20033;}
+.charpick canvas{margin-bottom:6px;}
+.charpick div{font-size:13px; color:#e2e7ee; font-weight:700; letter-spacing:1px;}
+#winstats{font-size:13.5px; color:#c8f5da; line-height:1.9; margin-bottom:14px;}
+#dlgopts{max-height:224px; overflow-y:auto; padding-right:4px;}
+#dlgopts::-webkit-scrollbar{width:8px;} #dlgopts::-webkit-scrollbar-thumb{background:#39435a; border-radius:4px;}
+.opt.sel{border-color:var(--gold); background:#2a2410; color:var(--gold); font-weight:700;}
+.eqgrid{display:grid; grid-template-columns:1fr 1fr; gap:6px;}
+.ordlist{display:flex; flex-direction:column; gap:4px;}
+.ordrow{display:flex; align-items:center; gap:10px; background:#1c2331; border:1px solid #3a4560; border-radius:8px; padding:6px 10px; font-size:13px; cursor:grab; user-select:none;}
+.ordrow.drag{opacity:.5; border-color:var(--gold);}
+.ordrow.okpos{border-color:#2f6f4f;}
+.ordrow.ok{border-color:var(--green); background:#123322; color:#c8f5da;}
+.grip{color:var(--gold); font-weight:800; width:22px; text-align:right;}
+.otxt{flex:1;}
+.arrows{display:flex; gap:3px;}
+.ab{background:#10151f; border:1px solid #3a4560; color:#aab3bd; border-radius:5px; width:24px; height:22px; cursor:pointer; font-size:10px;}
+.ab:hover{border-color:var(--gold); color:var(--gold);}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div class="eyebrow">CE 210 · Civil Engineering Materials Lab</div>
-    <h1 id="title">Pass-Off Tracker</h1>
-    <div class="sub">Raise your hand for a coach → get coached → raise your hand to pass off → a proctor pairs up. Coaching and proctoring both earn extra credit.</div>
-  </header>
-
-  <div id="modebar" class="modebar mode-local">Checking storage…</div>
-
-  <nav>
-    <button class="tab active" data-view="student">Student</button>
-    <button class="tab" data-view="queues">Queues</button>
-    <button class="tab" data-view="dashboard">Dashboard</button>
-    <button class="tab" data-view="setup">Setup</button>
-    <button class="btn" id="soundBtn" style="margin-left:auto">🔔 Sound: on</button>
-    <button class="btn" id="refreshBtn">↻ Refresh</button>
-  </nav>
-
-  <div id="app"><div class="loading">Loading…</div></div>
+<div id="wrap">
+  <div id="dash">
+    <div id="dashtop">
+      <span id="dashtitle">⛏ THE MATERIALS INSPECTOR</span>
+      <div id="pbarw"><div id="pbar"></div></div>
+      <span id="count">0 / 22 tests certified</span>
+    </div>
+    <div id="chips"></div>
+  </div>
+  <div id="stage">
+    <canvas id="cv" width="992" height="544"></canvas>
+    <div id="locname"></div>
+    <div id="hint"></div>
+    <div id="toast"></div>
+    <div id="dlg">
+      <div id="dlghead"><canvas id="portrait" width="52" height="60"></canvas><div><div id="dlghead"><canvas id="portrait" width="52" height="60"></canvas><div><div id="dlghead"><canvas id="portrait" width="52" height="60"></canvas><div><div id="dlghead"><canvas id="portrait" width="52" height="60"></canvas><div><div id="dlghead"><canvas id="portrait" width="52" height="60"></canvas><div><div id="dlgname"></div><div id="dlgrole"></div></div></div><div id="dlgrole"></div></div></div><div id="dlgrole"></div></div></div><div id="dlgrole"></div></div></div><div id="dlgrole"></div></div></div>
+      <div id="dlgtext"></div>
+      <div id="dlgopts"></div>
+      <div id="dlgnext">▼ continue (Space)</div>
+    </div>
+    <div id="title" class="overlay">
+      <h1>THE MATERIALS INSPECTOR</h1>
+      <h2>Something is wrong at Bench &amp; Berm Testing Co. Bad numbers are walking out the door — a sieve analysis that doesn't add up, cylinders curing in a truck bed, a nuclear gauge parked next to a water truck. You're the new technician, and you're the only one who paid attention in CE&nbsp;210.<br><br>Talk to everyone. Learn each test. Spot the mistake. Fix it — with the right procedure, or the right tool.<br>Certify all <b style="color:#f2c200">22 tests</b> and save the company's reputation.</h2>
+      <div id="charrow">
+        <div class="charpick" id="pickM"><canvas width="64" height="80"></canvas><div>ALEX</div></div>
+        <div class="charpick" id="pickF"><canvas width="64" height="80"></canvas><div>MAYA</div></div>
+      </div>
+      <button class="bigbtn" id="startbtn">CLOCK IN ▸</button>
+      <div style="font-size:11px;color:#5d6570;margin-top:14px">WASD / arrows to move · SPACE or E to talk · walk over sparkles to pick up tools</div>
+    </div>
+    <div id="win" class="overlay" style="display:none">
+      <h1>🏆 ALL 22 TESTS CERTIFIED</h1>
+      <div id="winstats"></div>
+      <h2 id="wintext"></h2>
+      <button class="bigbtn" onclick="location.reload()">PLAY AGAIN</button>
+    </div>
+  </div>
+  <div id="inv">
+    <span id="invlabel">TOOL BAG:</span>
+    <span id="invitems" style="display:flex;gap:6px;flex-wrap:wrap"></span>
+    <span id="keys">WASD/←↑→↓ move · SPACE/E talk · door ⇄ jobsite</span>
+  </div>
 </div>
 
 <script>
+"use strict";
+/* ============================================================
+   QUEST DATA — 22 tests. Each quest:
+   code, name, tool (id or null),
+   intro[]  : NPC teaches what they're doing (mistake embedded)
+   spot     : {q, opts[4], correct, why, wrong}
+   fix      : {q, opts[4], correct, why, wrong}  (skipped if tool quest)
+   toolAsk  : line NPC says when a tool is needed
+   outro[]  : thanks + real-world stakes
+============================================================ */
+const QUESTS = {
+
+r90:{code:"R 90", name:"Sampling", tool:null,
+ intro:["Hey, new blood! Randy. Sampling and splitting — the glamour work. Boss wants a sample of the 3/4-minus stockpile, so I do what's efficient: I shovel from the bottom edge of the pile. Material's loose down there, fills the bucket in no time.",
+ "One scoop, tag it, done. The pile's all the same rock anyway, right? Rock is rock."],
+ spot:{q:"Something's wrong with Randy's sample. What is it?",
+ opts:["The bucket is too small for 3/4-minus material","The bottom of a stockpile is where the big rock rolls and collects — one grab there is badly segregated","He forgot to wet the shovel first","Samples must be taken at night when the pile is cool"],
+ correct:1, why:"Exactly. Stockpiles segregate — coarse particles roll to the bottom edge. Randy's 'efficient' scoop is a rock-heavy lie about the whole pile.",
+ wrong:"Not quite. Think about what happens to a pile of mixed sizes as it's built — where do the big ones end up?"},
+ fix:{q:"What should Randy do instead?",
+ opts:["Take one scoop from the very top instead","Use the loader method: discard the first bucketful, take a full bucket, roll out a small pile, back-drag it flat, and shovel from all four quadrants","Mix the whole 2,000-ton stockpile with the loader first","Take the sample from the truck instead, from the tailgate spill"],
+ correct:1, why:"Right — loader method. First bucket discarded, fresh bucket rolled into a small pile, back-dragged flat, then vertical shovel increments from each quadrant, combined and mixed.",
+ wrong:"Closer to the top isn't the fix — the fix is a method that defeats segregation entirely."},
+ outro:["Randy: Huh. So my 'quick scoop' was feeding the sieve room a rock-heavy sample all month... no wonder the gradations kept failing coarse. Every test downstream starts here, doesn't it. Alright — loader method from now on."]},
+
+r76:{code:"R 76", name:"Reducing", tool:null,
+ intro:["Randy again. So once I've got the field sample I gotta shrink it for the sieve room. Target's 5,000 grams. I run it through the splitter a couple times and — here's my trick — when it comes out at 5,340, I just scoop a little off the top 'til the scale reads 5,000 on the nose. Precision!"],
+ spot:{q:"What's wrong with Randy's 'precision'?",
+ opts:["The scale should read 5,001 g for safety","Scooping material off selectively removes certain sizes — it biases the sample. Test size is a minimum, not a bullseye","He should scoop from the bottom, not the top","5,000 g is too much material for any test"],
+ correct:1, why:"Yes — a scoop off the top grabs whatever's on top (usually fines or coarse, never a fair mix). 5,340 g is a perfectly good sample; 'exactly 5,000' is not a goal.",
+ wrong:"The number on the scale isn't the problem — think about WHAT his scoop removes."},
+ fix:{q:"And when he quarters a pile instead of using the splitter, which portions should he keep?",
+ opts:["The two biggest quarters","Whichever two look most alike","Two diagonally opposite quarters — including all the fines","The top halves of all four quarters"],
+ correct:2, why:"Diagonally opposite, fines and all. That preserves whatever segregation pattern exists instead of doubling it.",
+ wrong:"Looks have nothing to do with it — geometry does."},
+ outro:["Randy: Reduce by halving, never trim to a number. Y'know, the old-timer who trained me did the scoop trick too. Guess bad habits split down the generations like samples. Not anymore."]},
+
+t255:{code:"T 255", name:"Moisture", tool:null,
+ intro:["Oh! Hi hon, I'm Tina — moisture and wash bench. Watch this: sample went in wet at 525.0 grams. I dried it 'til it LOOKED dry — nice and fluffy — weighed 500.0. So the moisture is 25 over 525... 4.8%! I put it on the board already."],
+ spot:{q:"Tina made TWO mistakes. Which answer catches the calculation one?",
+ opts:["She should divide the water by the DRY mass (500.0), not the wet mass — it's 5.0%, not 4.8%","She weighed in grams instead of pounds","25 grams of water is impossible","She should multiply by 1000, not 100"],
+ correct:0, why:"Moisture content is water ÷ DRY mass × 100. 25 ÷ 500 = 5.0%. Dividing by the wet mass is the single most common moisture mistake in the industry.",
+ wrong:"The units are fine — look at what's on the bottom of her fraction."},
+ fix:{q:"And the other mistake — 'dried until it LOOKED dry.' What does the procedure actually require?",
+ opts:["Dry for exactly 24 hours, no more, no less","Dry until it stops steaming","Prove constant mass: heat the extra specified time (oven 30 min / microwave 2 min / other 10 min) and show the mass changed less than 0.10%","Dry until the sample turns white"],
+ correct:2, why:"Constant mass is proven by the scale, never the eye: extra drying time, then a re-weigh showing under 0.10% change.",
+ wrong:"'Looks dry' and clock time are both guesses. The procedure demands PROOF — from the balance."},
+ outro:["Tina: Divide by dry, prove it's dry. Two little rules... and you know the batch plant uses my numbers to set their water every morning? A wrong moisture on the sand quietly re-designs every mix of the day. I'll re-run the board."]},
+
+t11:{code:"T 11", name:"Wash (No. 200)", tool:"guard",
+ intro:["Tina again, hon. Wash test now — finding the dust finer than the No. 200. I get the water swirling nice and cloudy... then I pour the WHOLE THING, rocks and all, straight onto my No. 200 sieve. It's a sieve! Sieving is its job!"],
+ spot:{q:"Why is Tina about to destroy a $60 sieve?",
+ opts:["The No. 200 mesh is delicate cloth — dumping solids on it directly punctures and stretches it. Only the WASH WATER gets decanted, through a coarser guard sieve on top","Water should never touch a sieve","She's pouring too slowly","The No. 200 should be at the top of a full stack"],
+ correct:0, why:"The No. 200 is a fine woven cloth. Solids stay in the container; only cloudy wash water gets poured over a nested guard sieve (like a No. 10) protecting the 200 below.",
+ wrong:"Water is exactly what this test uses — the problem is what's riding along WITH the water."},
+ toolAsk:"Tina: A guard sieve! I knew we had one... it's been missing off my bench for weeks. If you find a No. 10 sieve around the lab, bring it here, hon.",
+ outro:["Tina: Guard on top, No. 200 protected, solids stay in the pan, wash 'til the water runs clear, and everything caught goes back in the sample before re-drying. And the percent is figured on the ORIGINAL dry mass. You just saved the company a sieve and me an argument with purchasing."]},
+
+t27:{code:"T 27", name:"Sieve Analysis", tool:"sieve",
+ intro:["Sam. Sieve room. Don't touch anything. ...Fine, watch. 500.0 grams in, shake, weigh everything out: 493.8 grams. Whatever, close enough — I write the percents and send it. Also I cram the whole coarse fraction onto one sieve. Fewer sieves, faster cleanup. Efficiency."],
+ spot:{q:"Sam's numbers are 6.2 g short. What does the procedure say about that?",
+ opts:["Under 10 grams of loss is always fine","The check-sum must agree within 0.3% — his is 1.24%, so the test is INVALID and cannot be reported","He can add 6.2 g of new material to balance it","Round the loss to zero"],
+ correct:1, why:"6.2 ÷ 500 = 1.24% — four times the 0.3% limit. Material escaped or is wedged in his crammed sieve. That analysis is dead; it gets re-run, not reported.",
+ wrong:"There's a hard numeric limit for exactly this situation — do you remember it?"},
+ toolAsk:"Sam: ...And I suppose your fix for my 'cramming' is an intermediate sieve to split the load. We HAD one. It grew legs. Find it and I'll use it. Maybe.",
+ outro:["Sam: Overloaded sieve blinds — reads coarser than truth — and blinded sieves are where my missing grams were hiding. Extra sieve in the stack, brush every screen, check-sum inside 0.3%, report whole percents except the 200 at 0.1. ...Thanks. Don't tell anyone I said that."]},
+
+t335:{code:"T 335", name:"Fractured Faces", tool:null,
+ intro:["Fran, fracture counts. It's a zen thing — me, a pile of rocks, good light. This one's got a tiny chip on the corner, so: fractured pile. This round one has a scratch: fractured. Honestly most things end up in my 'questionable' pile — it's about 20% of the sample — but I never re-sort it, the math handles it."],
+ spot:{q:"What's wrong with Fran's sorting?",
+ opts:["She needs sunglasses for the glare","Tiny chips and scratches don't count — a fractured face needs sharp, well-defined edges exposing at least 25% of the particle's maximum cross-section","Round particles should go in the fractured pile","Sorting should be done by the handful, not per particle"],
+ correct:1, why:"The 25% rule exists precisely to screen out cosmetic chips. A nick on a corner is an unfractured particle wearing a scratch.",
+ wrong:"Per-particle sorting in good light is correct — her CRITERIA are the problem."},
+ fix:{q:"And her 20% questionable pile that she 'never re-sorts'?",
+ opts:["Fine — questionable counts as half, so size doesn't matter","The procedure says re-sort the questionable pile whenever it exceeds 15% of the total mass","Questionable piles are always discarded","She should flip a coin for each questionable particle"],
+ correct:1, why:"Q counts half — but only if it stays small. Over 15% means the judgment is doing too much work: look again.",
+ wrong:"The half-credit rule has a limit on how much can hide behind it."},
+ outro:["Fran: 25% of the cross-section, sharp edges, re-sort past 15%. You know why the spec cares? Rounded gravel under trucks rolls like ball bearings — pavements rut in a season. My little zen piles decide whether a supplier gets paid crushed-rock prices for river gravel. That's... less zen than I thought."]},
+
+t85:{code:"T 85", name:"Coarse SG & Absorption", tool:"towel",
+ intro:["Gloria. Specific gravity bench. In a hurry today — these were supposed to soak overnight but I only got two hours in, should be fine, rock's rock. Now I towel them bone dry — I mean REALLY scrub, no shine, no damp, nothing — then weigh in air, weigh underwater, oven-dry, weigh again. Three masses, easy math."],
+ spot:{q:"Two problems. Which answer nails the soak?",
+ opts:["Two hours is fine for hard rock","The soak must be 15–19 hours — two hours leaves the pores unsaturated, so B and every gravity built on it are wrong","She should soak for a week to be safe","Soaking is optional if the rock looks wet"],
+ correct:1, why:"15–19 hours. Absorption is a slow drink — an unsaturated particle lies about its SSD mass and its absorption both.",
+ wrong:"There's a specific window in the procedure — and it's a lot longer than her two hours."},
+ toolAsk:"Gloria: And the scrubbing... okay, yes, I over-towel. SSD means damp-not-shiny, and my old towel is basically sandpaper now. There's a fresh absorbent towel somewhere in this lab — bring it and I'll go gentle.",
+ outro:["Gloria: 15 to 19 hours, towel to damp-not-shiny — scrub too hard and I'm pulling water back OUT of the pores, which fakes the SSD mass. And these gravities are the exchange rate for the whole mix design... 0.02 off and the concrete guys re-proportion a mix for no reason. Overnight soak goes on the calendar."]},
+
+t176:{code:"T 176", name:"Sand Equivalent", tool:null,
+ intro:["Ernie! Sand equivalent! Fastest hands in the lab! Solution jug sits right here on the bench next to the cylinder — convenient! Shake it, irrigate it, and read it RIGHT AWAY — bam! Sand 3.3, clay 9.9, that's 33.3, I write 33! Next sample! Time is money!"],
+ spot:{q:"Ernie's speed broke the test. What's the biggest problem?",
+ opts:["He should shake for 10 minutes","There's a mandatory settling period — 20 minutes ± 15 seconds, completely undisturbed — before ANY reading. Reading 'right away' reads a cloud, not a clay column","The jug should be colder","Sand equivalent has no timing rules"],
+ correct:1, why:"20 minutes ± 15 seconds of stillness is what separates the suspended clay column from the settled sand. Ernie's been reading soup.",
+ wrong:"This test is nothing BUT timing rules — which one governs the moment before reading?"},
+ fix:{q:"Two more of Ernie's shortcuts need fixing. Which answer gets both?",
+ opts:["The jug belongs 36 ± 1 in. ABOVE the work surface (siphon head is part of the calibration), and 33.3 rounds UP to 34 — SE always rounds up","The jug should be on the floor, and 33.3 rounds to 33","Height doesn't matter, but he should report 33.3 with the decimal","He should read the sand with a flashlight"],
+ correct:0, why:"36 ± 1 inches of siphon head, and the round-UP rule — 33.3 becomes 34. Always up, never down.",
+ wrong:"One of his numbers and one piece of his setup are both off — look for the answer that fixes both."},
+ outro:["Ernie: Twenty minutes of NOTHING?! ...Okay, okay. Jug up high, twenty untouched minutes, round UP. Here's the thing though — a spec minimum of 35 means my '33' just rejected sand that might really be a 34 or 35. One rainy week washing pit fines into a stockpile, and this little cylinder decides if a whole source shuts down. I'll slow down. A little."]},
+
+t99:{code:"T 99", name:"Proctor", tool:null,
+ intro:["Dr. Packer — yes, like the test, hilarious, never heard that one. Standard Proctor, five points. By point four my arm's tired, so those layers get maybe 20 blows. Also I take the moisture sample off the top of the mold — top's right there, why dig?"],
+ spot:{q:"Why do Dr. Packer's tired arms ruin the curve?",
+ opts:["20 blows is fine if they're hard blows","The whole point is a STANDARD effort — 3 layers, 25 blows each, 5.5 lb hammer, 12 in. drop. Shorting blows means points on the curve got different energies and can't be compared","He should do 50 blows to be safe","Blows only matter on the first layer"],
+ correct:1, why:"Standard effort is the entire premise. Twenty tired blows on point four means point four isn't on the same curve as points one through three.",
+ wrong:"'Hard' isn't a unit. The procedure defines effort in exact, countable terms."},
+ fix:{q:"And the moisture sample 'off the top'?",
+ opts:["Correct — the top is most representative","The specimen is sliced vertically and the moisture sample must represent ALL layers — moisture migrates during compaction, and the top lies","Moisture samples come from the leftover bucket","Skip the moisture; use the wet density directly"],
+ correct:1, why:"Slice it vertically, sample the full depth. The top layer's moisture is not the specimen's moisture.",
+ wrong:"Think about where the water goes when you hammer soil in layers."},
+ outro:["Dr. Packer: Twenty-five real blows and a full-depth moisture sample. You realize what this curve IS, don't you? Every sand cone and gauge test on the project divides by MY peak. If my MDD is soft, the whole job gets graded on a curve — literally. ...That one was actually funny. Write it down."]},
+
+t272:{code:"T 272", name:"One-Point", tool:null,
+ intro:["Packer again. Field crew radios in needing a target NOW, so: one-point Proctor. I compact one mold at whatever moisture the soil showed up at — today it's sopping, way past optimum — drop my point on the family of curves, and pick the curve it's... nearest to. Ish. Done in minutes!"],
+ spot:{q:"What invalidates Dr. Packer's one-point today?",
+ opts:["One-points are only legal on Tuesdays","The point must fall within 80–100% of optimum moisture to be valid — 'sopping, way past optimum' fails the gate, so the soil must be dried back and re-run","He used the wrong radio channel","One mold is never enough; minimum is three"],
+ correct:1, why:"80 to 100 percent of optimum — near and slightly dry. Wet of optimum, the family's curves converge and the match is a guess wearing a lab coat.",
+ wrong:"The one-point method is legitimate — but it has validity gates, and today's moisture blows through one of them."},
+ fix:{q:"When matching against a SINGLE reference curve instead of a group, what's the extra gate?",
+ opts:["The point must plot within 2 lb/ft³ of the curve (and still within 80–100% of optimum)","The point must touch the curve exactly","The curve must be redrawn through the point","No extra gate — single curves are always valid"],
+ correct:0, why:"Within 2 lb/ft³ AND in the moisture window. Miss either, and it's a full Proctor, no shortcuts.",
+ wrong:"There's a numeric tolerance — a small one."},
+ outro:["Packer: Dry it back, re-run, respect the gates. The one-point is how a lab keeps a fleet of scrapers moving — minutes instead of hours — but the gates are what keep the shortcut from becoming a shrug. Fair enough, inspector."]},
+
+r75:{code:"R 75", name:"Family of Curves", tool:null,
+ intro:["Last one from me. My family of curves — beautiful, isn't it? Built it years ago from the north pit. Today's soil is from the NEW pit across the valley — different color, gritty, probably different clay — but curves are curves. I'll just use the north family. Saves building a new one."],
+ spot:{q:"Why can't the north-pit family judge the new pit's soil?",
+ opts:["Families expire after one year","A family only speaks for SIMILAR soils from a common source — a different pit with different gradation and plasticity needs its own full Proctors before any family can be used","Curves from across a valley are fine if the color matches","Families can be borrowed with a supervisor's signature"],
+ correct:1, why:"The family's whole authority comes from similarity. New source, new soils, new full Proctors — then a new family, if they nest.",
+ wrong:"Nothing about paperwork or age — think about where a family's credibility comes from."},
+ fix:{q:"How does Dr. Packer know when the new pit's curves actually form a family?",
+ opts:["When there are at least two of them","When full T 99 curves from the source nest together with a consistent characteristic shape","When the lab manager approves the binder","When the one-points start passing"],
+ correct:1, why:"Nesting, consistent shape, common source — that's a family. One oddball curve that won't nest is telling you the pit isn't uniform.",
+ wrong:"It's a visual, physical property of the curves themselves."},
+ outro:["Packer: New pit, new Proctors, new family. It's a week of work to build — and years of same-hour answers after. Like tenure, but useful. Go on, the asphalt bench needs you more than I do."]},
+
+t209:{code:"T 209", name:"Rice (Gmm)", tool:"vaclid",
+ intro:["Benny. Asphalt corner. Rice test — maximum density, zero air. Broke up the mix, weighed it dry, covered it with water... and here's my time-saver: I skip the vacuum. Fifteen minutes of a pump wheezing? The water gets in there eventually. Physics."],
+ spot:{q:"What does Benny's skipped vacuum do to Gmm?",
+ opts:["Nothing — water displaces air naturally","Trapped air makes the sample seem bigger and lighter underwater, so Gmm reads LOW — and every air-voids number computed from it is wrong","Gmm reads high","The vacuum only matters in winter"],
+ correct:1, why:"Air bubbles cling in and between particles. The vacuum — 30 ± 5 mmHg for 15 ± 1 minutes, agitating — pulls them out so the test truly measures zero-air density.",
+ wrong:"'Eventually' is not a spec. The bubbles hiding in the mix don't leave on their own — and they change the answer in one particular direction."},
+ toolAsk:"Benny: Fine, you got me — I 'skip' the vacuum because the LID for the vacuum vessel walked off. No lid, no seal, no vacuum. Find that lid and I'll run it right, full fifteen minutes, agitation and all.",
+ outro:["Benny: Lid on, 30 ± 5 mmHg, 15 ± 1 minutes, keep it agitating. Here's what I didn't tell you: Gmm is the bottom of the air-voids fraction, and air voids set contractor PAY on paving jobs. My lazy Gmm was moving real money. That stays between us and the lid."]},
+
+t166:{code:"T 166", name:"Bulk SG (Gmb)", tool:null,
+ intro:["Benny again. Bulk gravity on compacted cores. Dry weight, easy. Underwater weight after a four-minute soak, easy. Then the SSD weigh — I pull the core out, set it on the bench, go pour a coffee, come back in a couple minutes, pat it with a towel, weigh it. Coffee's important."],
+ spot:{q:"What did Benny's coffee break do to mass B?",
+ opts:["Nothing — asphalt doesn't hold water","Water drained and evaporated off the core for two minutes, so B reads LOW — the towel-and-weigh must happen within 5 and 15 seconds of leaving the bath","B reads high because of condensation","The coffee steam contaminates the balance"],
+ correct:1, why:"Damp-towel within 5 seconds, on the scale with the whole sequence inside 15. B − C is the core's VOLUME — let it drip and dry and the volume shrinks on paper.",
+ wrong:"The core absolutely holds surface water — for a very short, very important window."},
+ fix:{q:"With Gmb = 2.369 and Benny's (corrected) Gmm = 2.468, what are the air voids — and is that good?",
+ opts:["9.9% — too open","4.0% — right on the classic dense-graded target","0.4% — dangerously tight","Can't compute without the core thickness"],
+ correct:1, why:"Va = (1 − 2.369/2.468) × 100 = 4.0%. The sweet spot: enough voids to avoid rutting and bleeding, few enough to keep water out.",
+ wrong:"Va = (1 − Gmb ÷ Gmm) × 100. Run it."},
+ outro:["Benny: Fifteen seconds, no coffee. And the payoff of doing BOTH tests right: real air voids. Too low ruts, too high ravels — 4% is the number roads live on. ...You're going to the jobsite next, aren't you? Tell Slick out there I want my mallet back."]},
+
+tm2:{code:"TM 2", name:"Concrete Sampling", tool:null,
+ intro:["*You step outside — sun, dust, and a concrete truck rolling its drum.* Chuck here, and you're just in time! Truck's backing in. Soon as that chute swings, I catch the very FIRST concrete down — freshest stuff, right off the top! One quick bucket and I'm testing inside a minute!"],
+ spot:{q:"Why is Chuck's 'freshest' bucket the worst one on the truck?",
+ opts:["The first discharge is wetter, rockier, and segregated — sampling starts only after about 1/2 yd³ has discharged, taken from the middle of the load","First concrete is too cold","He should sample from the very last concrete instead","Buckets are prohibited; only wheelbarrows"],
+ correct:0, why:"First out is chute wash and segregation. Let a half yard pass, then pass the receptacle through the ENTIRE stream, two or more portions, combined and remixed.",
+ wrong:"'Fresh' isn't the issue — WHERE in the load it comes from is. First and last out of a drum are both liars."},
+ fix:{q:"The sample's in the wheelbarrow. What two clocks just started?",
+ opts:["No clocks — concrete waits for you","Slump, temperature, and air must START within 5 minutes; molding cylinders within 15","One hour for everything","30 seconds to remix, then no limits"],
+ correct:1, why:"5 and 15. Fresh concrete changes by the minute — the limits exist so everyone's numbers describe the same concrete.",
+ wrong:"There are two specific numbers, and this whole jobsite runs on them."},
+ outro:["Chuck: Middle of the load, whole stream, remix, and RUN — five and fifteen. Y'know last month a load got rejected off MY sample and the producer swore it was fine concrete... maybe it was, and my first-bucket habit failed it. That one stings. Won't happen again."]},
+
+t309:{code:"T 309", name:"Temperature", tool:"thermo",
+ intro:["Rosa — QC. Temperature check: I poke my old pocket thermometer about an inch into the edge of the wheelbarrow, count to ten, yank it out, and read it in the shade. 78 degrees, write it down, done. It's been reading a little weird lately but it's probably fine."],
+ spot:{q:"Count the violations. Which answer catches the big ones?",
+ opts:["The shade is the only problem","Needs 3 in. of immersion AND 3 in. of concrete around the sensor, left in at least 2 minutes (or stable), and read while still IN the concrete — an inch at the edge, yanked and read in air, fails all three","Ten seconds is too long","Wheelbarrow concrete can't be measured"],
+ correct:1, why:"Three inches deep, three inches of cover, two minutes minimum, read in place. The moment the stem leaves the concrete it starts reading the weather.",
+ wrong:"One of those options fixes three violations at once."},
+ toolAsk:"Rosa: And 'reading a little weird' — yeah, this thermometer hasn't seen a calibration in years. There's a fresh CALIBRATED one in a toolbox somewhere on this site. Bring it and I'll retire this relic.",
+ outro:["Rosa: Calibrated stem, buried three inches, two patient minutes, read in place, nearest 1°F. In July out here we hit the 90–95°F spec ceiling by 10 a.m. — that's why the big pours start at 4 in the morning. This little number schedules the whole site's alarm clocks."]},
+
+t119:{code:"T 119", name:"Slump", tool:null,
+ intro:["Name's Slick. Slump test artist. Fill the cone in three layers — I rod each one 25 times, then give the cone a few good raps with the mallet, settles it nice. Then the lift: slow and gentle, little twist at the end like opening a jar, takes me a good ten seconds. Smooth as butter. Oh — driver added a splash of water to loosen the load, no biggie."],
+ spot:{q:"Slick's technique has two illegal moves. Which answer names them?",
+ opts:["The mallet NEVER touches the slump cone (rodding only), and the lift is 12 in. straight up in 5 ± 2 seconds — no twist, no 'jar opening'","He should rod 50 times and lift in one second","The mallet is fine but the twist is required","Three layers is wrong; slump uses one layer"],
+ correct:0, why:"The mallet belongs to the air meter and cylinders — never the slump cone. And the lift is 5 ± 2 seconds, dead vertical. His twist drags the concrete and fakes the number.",
+ wrong:"His layer count and rodding are actually right — it's his two 'artistic flourishes' that are illegal."},
+ fix:{q:"And that 'splash of water' the driver added?",
+ opts:["Harmless — water evaporates","It raised the slump by raising the w/c ratio, and the strength it removed never comes back. A slump jump is exactly what this test exists to catch — flag it","It made the concrete stronger","Only matters in cold weather"],
+ correct:1, why:"Site water is a strength trade the buyer never agreed to. The slump test is the fastest lie detector in construction — and it just detected one.",
+ wrong:"Think about what the water-cement ratio does to strength — permanently."},
+ outro:["Slick: No mallet, no twist, five seconds, and I write up the water add. ...Benny wants his mallet back? Tell him it's been 'settling' my slump cones. On second thought — don't tell him that."]},
+
+t121:{code:"T 121", name:"Density & Yield", tool:null,
+ intro:["Vern. Unit weight. Fill the bucket in three layers, rod 'em, tap 'em, strike it off — then straight onto the scale, crusty overflow and all. Reads 45.9 lb today, bucket's 9.0, quarter cubic foot. The mud on the outside? It's concrete weighing concrete. Same stuff!"],
+ spot:{q:"Why does the crust on the outside matter?",
+ opts:["It doesn't — Vern's right","Everything clinging OUTSIDE the measure is weighed but isn't part of the calibrated volume — density reads falsely HIGH until the exterior is cleaned","It makes density read low","It only matters if it's dry"],
+ correct:1, why:"The volume in the math is the inside of the bucket. Spillover on the outside adds mass with no volume — a free, fake density boost.",
+ wrong:"'Same stuff' — but on the wrong side of the calibrated line."},
+ fix:{q:"Cleaned up, it's 44.6 lb full, 9.0 empty, 0.25 ft³. Density — and what does this number unlock?",
+ opts:["142.4 pcf — and with the batch ticket it gives yield and gravimetric air, the batch's accounting","183.6 pcf — and nothing else","35.6 pcf","142.4 pcf, but it's only for curiosity"],
+ correct:0, why:"(44.6 − 9.0) ÷ 0.25 = 142.4 pcf. Divide the ticket's total mass by density (and 27) for yield; compare to theoretical for gravimetric air. One bucket, three answers.",
+ wrong:"Full minus empty, over the volume. Then remember what the ticket needs from it."},
+ outro:["Vern: Clean bucket, honest number. And yield — huh. Relative yield of 0.97 on a 500-yard pour means somebody shorted the county fifteen yards of concrete. My crusty bucket coulda hid that. Consider me converted."]},
+
+t152:{code:"T 152", name:"Air Content", tool:null,
+ intro:["Vern again — air meter. Type B. Bowl's full, lid clamped. Now, I skip the water squirt — extra step, extra mess. Pump to the line, hit the lever, gauge says 6.4. I write 6.4. There's some 'correction factor' card in the case but math is math, gauge is gauge."],
+ spot:{q:"Vern skipped the water injection through the petcocks. What was that step for?",
+ opts:["Cooling the gauge","Flushing out the air trapped between the struck-off concrete and the lid — space air, not concrete air. Skip it and that gap gets counted as entrained air","Cleaning the petcocks for storage","Pre-wetting for the next test"],
+ correct:1, why:"Water in one petcock until it streams out the other, jarring the meter — that purges the headspace so the gauge measures only the air IN the concrete.",
+ wrong:"It's not housekeeping — it removes a specific pocket of air that would inflate the reading."},
+ fix:{q:"And that 'correction factor card' he ignores? Gauge 6.4, aggregate correction factor 0.4:",
+ opts:["Add it: report 6.8%","Subtract it: report 6.0% — the ACF removes air trapped in the aggregate's own pores, which isn't the paste's entrained air","Ignore it: report 6.4%","Divide by it: report 16%"],
+ correct:1, why:"Read minus rock: 6.4 − 0.4 = 6.0%. The rock's internal air is useless for freeze-thaw and gets subtracted, always.",
+ wrong:"The correction goes one direction only — and 'ignore' is how Vern got here."},
+ outro:["Vern: Water squirt, pump past the line and bleed back, petcocks closed, lever, mallet, read... minus the rock. In this climate, air is what keeps the first hard winter from spalling every driveway we pour. Half a percent rejects a load. Guess the extra step earns its mess."]},
+
+r100:{code:"R 100", name:"Cylinders", tool:"caps",
+ intro:["Pearl — I make the cylinders. Two layers, 25 rods each, tap-tap-tap, strike 'em off pretty. Then I load 'em straight into my truck bed — they ride around with me all day so they're safe, and tonight they cure in the cab where it's toasty. Tops open to breathe, naturally."],
+ spot:{q:"Pearl's cylinders are doomed. Why?",
+ opts:["Two layers is wrong for 4×8s","Fresh cylinders must stay on a level rigid surface WHERE THEY WERE MOLDED, covered, at 60–80°F, undisturbed — no transport for at least 8 hours after final set, and never bouncing around a truck bed","They should ride in the passenger seat","Cylinders cure best in direct sun"],
+ correct:1, why:"Molded next to their curing spot, covered immediately, initial cure 60–80°F, moist, untouched. A truck-bed ride during set shatters the young concrete's internal structure.",
+ wrong:"Her molding is actually fine — everything AFTER the strike-off is the crime scene."},
+ toolAsk:"Pearl: Covered, huh. I lost my cylinder caps weeks ago — that's why the tops 'breathe.' They're around this site somewhere. Bring me the caps and these babies stay moist and put.",
+ outro:["Pearl: Caps on, level spot, 60 to 80, nobody touches 'em for 8 hours after set. Here's the kicker — when a cylinder breaks low, nobody blames my truck bed. They blame the CONCRETE, and some producer eats a core-drilling bill for a mix that was fine. These little cans are legal documents. I'll treat 'em like it."]},
+
+t310:{code:"T 310", name:"Nuclear Density (Soil)", tool:"block",
+ intro:["Gus. Nuke gauge. Watch the master: flip it on, straight to the pad — warm-ups are for rookies. I set up right here next to the water truck, handy shade. Punch the pin hole exactly as deep as the rod, drop the source, one 30-second count, done. Standard count? Did one back in March."],
+ spot:{q:"Gus's setup breaks the siting rules. Which answer has them right?",
+ opts:["Gauges work anywhere flat","10–20 min warm-up; 30 ft from other sources, 10 FT FROM LARGE OBJECTS like that water truck, 6 in. from vertical projections — the truck is scattering radiation back into his detectors","The truck is fine if it's turned off","He only needs to be 3 ft from anything"],
+ correct:1, why:"That water truck is a giant reflector parked in his physics. Ten feet from large objects, thirty from other sources, six inches from projections — and let the electronics warm up.",
+ wrong:"The gauge doesn't care about shade — it cares about what's scattering its radiation."},
+ toolAsk:"Gus: 'A standard count in March'... yeah, yeah. Can't take one anyway — the reference STANDARD BLOCK vanished off my tailgate. Find the block and I'll count on it daily like a good boy.",
+ outro:["Gus: Daily standard count on the block, hole TWO INCHES deeper than the rod, gauge pulled back against the hole wall, two one-minute counts agreeing within 2.0 pcf, and a sealed 9-pound sample so the moisture can be verified without me. Also — the license, the badge, the log? Not ceremony. The source is real and so is the auditor. Fine. FINE. You're good, kid."]},
+
+t191:{code:"T 191", name:"Sand Cone", tool:"jar",
+ intro:["Dot. Sand cone — the referee test, when someone argues with Gus's gauge. Dig the hole, save MOST of the soil — a few crumbs stay behind, whatever — then run the sand while the compactor works the next lane right beside me. Rhythm of the jobsite! The ground's always shaking somewhere."],
+ spot:{q:"Two killers in Dot's routine. Which answer gets both?",
+ opts:["EVERY crumb of excavated soil must be saved and sealed (lost soil = lost mass = fake low density), and the sand must run VIBRATION-FREE — a compactor next door densifies the falling sand and fakes the hole volume big","The hole should be dug with a spoon, and shaking helps the sand settle honestly","Crumbs don't matter but the compactor does","The compactor matters only within 6 inches"],
+ correct:0, why:"Both. Lost crumbs shrink the soil mass; vibration packs extra sand into the same hole, inflating the computed volume — and both errors push density DOWN, failing lifts that actually passed.",
+ wrong:"One answer catches both of her 'rhythms.'"},
+ toolAsk:"Dot: Sealed, you say. My soil CONTAINER with the good lid disappeared — I've been using an open coffee can, which, yes, explains the crumbs AND the moisture loss. Find me a sealed container and this test goes honest.",
+ outro:["Dot: Every crumb sealed, dead-still ground, sand density does the volume math: 4.25 pounds of sand at 85.0 pcf is a 0.0500 cubic foot hole — soil mass over that, moisture out, divide by the Proctor... 98.6% today. Passes clean. And THAT'S the number that settles arguments — slow, physical, hard to argue with. Referee's honest again."]},
+
+t355:{code:"T 355", name:"Nuclear Density (Asphalt)", tool:null,
+ intro:["Manny — on the fresh mat. Density behind the rollers. My routine: gauge down anywhere, rod to backscatter, one count... then spin her a full 180 and count again. Today's pair came out 4 pcf apart — big gap, but hey, the average splits the difference, so I report the average and wave the roller on."],
+ spot:{q:"Manny's rotation and his 'average anyway' are both wrong. Which answer fixes them?",
+ opts:["Rotate 360° and always average","The second count is at 90° — not 180 — reseated on a MARKED footprint; and if the two densities differ by more than 2.5 pcf, you don't average, you RETEST in both directions","Never rotate; one count is enough","Rotate 45° and take five counts"],
+ correct:1, why:"Ninety degrees, same marked footprint. And 4 pcf apart is past the 2.5 limit — that pair is telling you something's wrong (seating, a segregated spot); it gets retested, not averaged into a lie.",
+ wrong:"His instinct to take two counts is right — the angle and his response to disagreement are both off."},
+ fix:{q:"His corrected average is 148.2 pcf; the mix's Gmm is 2.453. Percent compaction?",
+ opts:["96.8% — 148.2 ÷ (2.453 × 62.4)","104.2%","91.5%","Can't compute without a core"],
+ correct:0, why:"Target = Gmm × 62.4 = 153.1 pcf. 148.2 ÷ 153.1 = 96.8% — a solid mat. (Core correlation refines it when required.)",
+ wrong:"Convert Gmm to pcf first — times 62.4 — then divide."},
+ outro:["Manny: Ninety degrees, marked footprint, 2.5 pcf or retest. And I'll spread the filler thin and strike it off — you didn't even ding me for the filler, I'm volunteering it. The breakdown roller literally waits on my thumbs-up between passes... density bonuses ride on these counts. Tell the lab the mat's at 96.8 and climbing."]},
+};
+
+/* tools: id, label, map, x, y */
+const TOOLS = [
+ {id:"guard",  label:"No. 10 Guard Sieve",     map:"lab",  x:912, y:150},
+ {id:"sieve",  label:"Intermediate Sieve",     map:"lab",  x:96,  y:470},
+ {id:"towel",  label:"Absorbent Towel",        map:"lab",  x:520, y:175},
+ {id:"vaclid", label:"Vacuum Vessel Lid",      map:"lab",  x:300, y:210},
+ {id:"thermo", label:"Calibrated Thermometer", map:"site", x:930, y:120},
+ {id:"caps",   label:"Cylinder Caps",          map:"site", x:430, y:190},
+ {id:"block",  label:"Reference Standard Block",map:"site",x:500, y:500},
+ {id:"jar",    label:"Sealed Soil Container",  map:"site", x:930, y:480},
+];
+
+/* NPCs: name, map, x, y, palette [shirt, pants, skin, hair], hat?, quests in order */
+const NPCS = [
+ {name:"Randy",     map:"lab", x:170, y:190, pal:["#c75300","#3b3f46","#e8b48c","#5a3c1e"], quests:["r90","r76"]},
+ {name:"Tina",      map:"lab", x:430, y:150, pal:["#6b4fa0","#2e3238","#f0c8a0","#e0e0e0"], quests:["t255","t11"]},
+ {name:"Sam",       map:"lab", x:700, y:170, pal:["#2f6f6f","#3b3f46","#c88a5a","#1b1b1b"], quests:["t27"]},
+ {name:"Fran",      map:"lab", x:880, y:300, pal:["#1c7a4d","#2e3238","#e8b48c","#8a2be2"], quests:["t335"]},
+ {name:"Gloria",    map:"lab", x:620, y:330, pal:["#b3261e","#2e3238","#8a5a3a","#111111"], quests:["t85"]},
+ {name:"Ernie",     map:"lab", x:300, y:330, pal:["#f2c200","#3b3f46","#f0c8a0","#c75300"], quests:["t176"]},
+ {name:"Dr. Packer",map:"lab", x:250, y:470, pal:["#8a929b","#2e3238","#e8b48c","#dddddd"], quests:["t99","t272","r75"]},
+ {name:"Benny",     map:"lab", x:760, y:470, pal:["#1f5fb0","#3b3f46","#c88a5a","#3a2a10"], quests:["t209","t166"]},
+ {name:"Chuck",     map:"site",x:250, y:180, pal:["#e8611c","#2e3238","#e8b48c","#5a3c1e"], hat:1, quests:["tm2"]},
+ {name:"Rosa",      map:"site",x:520, y:170, pal:["#f2c200","#3b3f46","#c88a5a","#1b1b1b"], hat:1, quests:["t309"]},
+ {name:"Slick",     map:"site",x:760, y:200, pal:["#6b4fa0","#2e3238","#f0c8a0","#111111"], hat:1, quests:["t119"]},
+ {name:"Vern",      map:"site",x:880, y:340, pal:["#2f6f6f","#3b3f46","#e8b48c","#777777"], hat:1, quests:["t121","t152"]},
+ {name:"Pearl",     map:"site",x:340, y:330, pal:["#b3261e","#2e3238","#8a5a3a","#e0e0e0"], hat:1, quests:["r100"]},
+ {name:"Gus",       map:"site",x:600, y:430, pal:["#c75300","#3b3f46","#f0c8a0","#3a2a10"], hat:1, quests:["t310"]},
+ {name:"Dot",       map:"site",x:830, y:470, pal:["#1c7a4d","#2e3238","#e8b48c","#c75300"], hat:1, quests:["t191"]},
+ {name:"Manny",     map:"site",x:150, y:460, pal:["#1f5fb0","#2e3238","#c88a5a","#1b1b1b"], hat:1, quests:["t355"]},
+];
+
+const ORDER = ["r90","r76","t255","t11","t27","t335","t85","t176","t99","t272","r75","t209","t166",
+               "tm2","t309","t119","t121","t152","r100","t310","t191","t355"];
+</script>
+<script>
+/* ============ ENGINE v2 — illustrated, calc stages, Brother Smith ============ */
+"use strict";
+
+/* EDIT ME — Brother Smith's resource links (replace # with real URLs) */
+const LINKS = [
+ {label:"\ud83c\udfa5 Demo videos \u2014 every test method", url:"#"},
+ {label:"\ud83d\udcc4 WAQTC FOP procedures (PDF)", url:"#"},
+ {label:"\ud83d\udcdd Practice exam on Canvas", url:"#"},
+];
+
+/* typed-calculation stage for every test: eq shown, numeric answer, tolerance */
+const CALCS = {
+ r90:{prompt:"Loader method drill: the flat pile is sampled with one vertical shovel increment per quadrant. How many increments minimum?", eq:"increments = 1 per quadrant \u00d7 4 quadrants", ans:4, tol:0, unit:"increments", fb:"Four — one honest vertical bite from each quadrant, combined and mixed."},
+ r76:{prompt:"Your field sample is 20,000 g and the test needs \u2264 5,000 g. Each splitter pass keeps half. How many passes?", eq:"20{,}000 \u2192 \u00f72 \u2192 \u00f72 \u2192 \u2026 \u2264 5{,}000", ans:2, tol:0, unit:"passes", fb:"Two passes: 20,000 \u2192 10,000 \u2192 5,000 g. Halve honestly, never trim."},
+ t255:{prompt:"Tina re-runs her sample: wet 642.0 g, dry 600.0 g. Compute the moisture content.", eq:"w = (wet \u2212 dry) \u00f7 dry \u00d7 100", ans:7.0, tol:0.1, unit:"%", fb:"42.0 \u00f7 600.0 \u00d7 100 = 7.0%. Divided by DRY — Tina salutes you."},
+ t11:{prompt:"Original dry mass 500.0 g; after washing and re-drying, 482.5 g. Percent passing the No. 200?", eq:"P_{200} = (A \u2212 B) \u00f7 A \u00d7 100", ans:3.5, tol:0.1, unit:"%", fb:"17.5 \u00f7 500.0 \u00d7 100 = 3.5% — the dust the wash carried away."},
+ t27:{prompt:"Total sample 500.0 g; cumulative retained on and above the No. 8 is 200.0 g. Percent passing the No. 8?", eq:"\\% passing = (total \u2212 cum.\\ retained) \u00f7 total \u00d7 100", ans:60, tol:0.5, unit:"%", fb:"(500 \u2212 200) \u00f7 500 \u00d7 100 = 60% — cumulative fineness."},
+ t335:{prompt:"Fran's re-sorted piles: F = 380 g, Q = 40 g, N = 80 g. Percent fractured faces?", eq:"\\%F = (F + Q/2) \u00f7 (F + Q + N) \u00d7 100", ans:80, tol:0.5, unit:"%", fb:"(380 + 20) \u00f7 500 \u00d7 100 = 80%. Q rides along at half credit."},
+ t85:{prompt:"Gloria's overnight-soaked rock: A = 2035.0 g, B = 2065.0 g, C = 1290.0 g. Bulk specific gravity?", eq:"G_{sb} = A \u00f7 (B \u2212 C)", ans:2.626, tol:0.005, unit:"", fb:"2035.0 \u00f7 775.0 = 2.626. B \u2212 C is the particle's volume, courtesy of Archimedes."},
+ t176:{prompt:"Ernie's patient rerun: sand 3.3, clay 9.9. Sand equivalent? (Remember the rounding rule!)", eq:"SE = sand \u00f7 clay \u00d7 100, rounded\\ UP", ans:34, tol:0.4, unit:"", fb:"33.3 \u2192 rounds UP \u2192 34. Always up. Ernie owes you a soda."},
+ t99:{prompt:"A properly hammered point: wet density 121.5 pcf at 12.0% moisture. Dry density?", eq:"\u03b3_d = \u03b3_{wet} \u00f7 (1 + w/100)", ans:108.5, tol:0.2, unit:"pcf", fb:"121.5 \u00f7 1.12 = 108.5 pcf — one point of the curve, honestly earned."},
+ t272:{prompt:"Valid one-point: wet density 122.0 pcf at 14.0% moisture. Dry density to plot on the family?", eq:"\u03b3_d = \u03b3_{wet} \u00f7 (1 + w/100)", ans:107.0, tol:0.2, unit:"pcf", fb:"122.0 \u00f7 1.14 = 107.0 pcf. Now the family does the rest."},
+ r75:{prompt:"Gate check: a one-point is only valid if it falls within __% to 100% of optimum moisture.", eq:"validity\\ window = \\_\\_\\% \u2013 100\\% \\ of\\ OMC", ans:80, tol:0, unit:"%", fb:"80 to 100 percent of optimum — near, and slightly dry."},
+ t209:{prompt:"Benny's vacuumed Rice: A = 1432.7 g, B = 286.3 g, C = 1134.9 g (bowl method). Gmm?", eq:"G_{mm} = A \u00f7 (A + B \u2212 C)", ans:2.453, tol:0.005, unit:"", fb:"1432.7 \u00f7 584.1 = 2.453 — zero-air density, thanks to the recovered lid."},
+ t166:{prompt:"Core: Gmb = 2.369; mix Gmm = 2.468. Air voids?", eq:"V_a = (1 \u2212 G_{mb} \u00f7 G_{mm}) \u00d7 100", ans:4.0, tol:0.1, unit:"%", fb:"(1 \u2212 0.9599) \u00d7 100 = 4.0% — the number roads live on."},
+ tm2:{prompt:"The sample is remixed in the wheelbarrow. Within how many minutes must cylinder molding BEGIN?", eq:"slump/temp/air \u2264 5\\ min;\\ cylinders \u2264 \\ ?", ans:15, tol:0, unit:"min", fb:"Fifteen minutes for cylinders, five for everything else. Two clocks, always running."},
+ t309:{prompt:"Minimum concrete cover required around the thermometer sensor, in every direction?", eq:"cover \u2265 \\ ?\\ inches,\\ all\\ directions", ans:3, tol:0, unit:"in.", fb:"Three inches all around — anything less and the sensor reads the weather."},
+ t119:{prompt:"Target time for the mold lift, in seconds? (\u00b12 s allowed)", eq:"lift = 12\\ in.\\ straight\\ up\\ in\\ ?\\ \u00b1 2\\ s", ans:5, tol:0, unit:"s", fb:"Five seconds, dead vertical, no twist. Smooth is legal; 'artistic' is not."},
+ t121:{prompt:"Vern's clean bucket: full 44.6 lb, empty 9.0 lb, volume 0.25 ft\u00b3. Density?", eq:"D = (full \u2212 empty) \u00f7 V", ans:142.4, tol:0.2, unit:"pcf", fb:"35.6 \u00f7 0.25 = 142.4 pcf — the anchor number for yield and gravimetric air."},
+ t152:{prompt:"Gauge reads 6.4%; aggregate correction factor is 0.4%. Reported air content?", eq:"Air = gauge \u2212 ACF", ans:6.0, tol:0.05, unit:"%", fb:"6.4 \u2212 0.4 = 6.0%. Read minus rock, every time."},
+ r100:{prompt:"After final set, cylinders must sit undisturbed for at least how many hours before transport?", eq:"no\\ transport\\ for \u2265 \\ ?\\ hours\\ after\\ final\\ set", ans:8, tol:0, unit:"h", fb:"Eight hours minimum — young concrete does not ride in truck beds."},
+ t310:{prompt:"Gus's honest test: dry density 103.1 pcf; Proctor MDD 108.5 pcf. Percent compaction?", eq:"\\%C = \u03b3_d \u00f7 MDD \u00d7 100", ans:95.0, tol:0.2, unit:"%", fb:"103.1 \u00f7 108.5 \u00d7 100 = 95.0% — passes a 95 spec by a whisker."},
+ t191:{prompt:"Dot's sand: 4.25 lb ran into the hole; calibrated sand density 85.0 pcf. Hole volume?", eq:"V = sand\\ in\\ hole \u00f7 sand\\ density", ans:0.05, tol:0.002, unit:"ft\u00b3", fb:"4.25 \u00f7 85.0 = 0.0500 ft\u00b3 — the sand just measured a hole no ruler could."},
+ t355:{prompt:"Manny's mat: average 148.2 pcf; Gmm = 2.453. Percent compaction? (Hint: target = Gmm \u00d7 62.4)", eq:"\\%C = \u03b3 \u00f7 (G_{mm} \u00d7 62.4) \u00d7 100", ans:96.8, tol:0.3, unit:"%", fb:"148.2 \u00f7 153.1 \u00d7 100 = 96.8% — tell the roller it's close."},
+};
+ORDER.forEach(q=>{ QUESTS[q].calc = CALCS[q]; });
+
+/* Brother Smith — advisor NPC in both scenes */
+NPCS.push({name:"Brother Smith", map:"lab",  x:490, y:290, pal:["#f5f4ee","#3b3f46","#e8b48c","#5d6570"], smith:true, quests:[]});
+NPCS.push({name:"Brother Smith", map:"site", x:450, y:250, pal:["#f5f4ee","#3b3f46","#e8b48c","#5d6570"], hat:1, smith:true, quests:[]});
+
+const SMITH_STORIES = [
+ "Brother Smith: Early in my career, a whole week of density tests failed a subgrade — rip-out orders ready to go. Turned out the gauge's standard count hadn't been taken since the operator changed batteries. The SOIL was fine. Every procedure step you think is fussy? It got fussy because somewhere, someone paid for skipping it.",
+ "Brother Smith: I once watched a producer and a DOT engineer argue for two hours over a rejected load. Know what settled it? The sampling record. Times, portions, half-yard rule — all documented. The tech who wrote that record said maybe ten words the whole meeting. Paperwork is quiet, but it wins arguments.",
+ "Brother Smith: A student of mine caught a batch plant's moisture probe drifting — her hand-run T 255 disagreed with the computer by 2%. The plant recalibrated and quietly fixed every mix that week. She had a job offer before the semester ended. Knowing WHY beats knowing HOW, every time.",
+];
+let storyIdx = 0;
+
+function smithSteps(){
+ return [{q:"Brother Smith: Good to see you making the rounds, inspector. What can I do for you?",
+  menu:[
+   {label:"\ud83c\udf93 How should I study for the WAQTC exams?",
+    steps:[{text:"Brother Smith: Three habits. One — drill the NUMBERS until they're reflexes: soak times, blow counts, tolerances, time limits. The exam loves exact values. Two — for every step, ask 'what breaks if I skip this?' If you can answer that, you understand the test; if you can't, that's tonight's studying. Three — teach it to someone. If you can explain the vacuum in the Rice test to your roommate, you own it."}]},
+   {label:"\ud83d\udcd6 Tell me a story from the field.",
+    steps:[{fnText:()=>SMITH_STORIES[(storyIdx++)%SMITH_STORIES.length]}]},
+   {label:"\ud83e\udded Where should I go next?",
+    steps:[{fnText:()=>{
+      const left=ORDER.filter(q=>!state.done.has(q));
+      if(left.length===0) return "Brother Smith: Nowhere — you've certified all twenty-two. Go enjoy the sunshine.";
+      const q=left[0], npc=NPCS.find(n=>n.quests&&n.quests.includes(q));
+      return "Brother Smith: "+left.length+" tests still need you. "+QUESTS[q].code+" ("+QUESTS[q].name+") is open — go find "+npc.name+" "+(npc.map==="lab"?"in the lab":"out on the jobsite")+". And remember: listen to their whole explanation before you judge. The mistake is always hiding in something they're proud of.";
+    }}]},
+   {label:"\ud83d\udd17 Resources — videos, procedures, practice exam",
+    steps:[{text:"Brother Smith: Everything's posted for you \u2014 demo videos for each method, the official WAQTC procedures, and a practice exam that mirrors the real thing. Take these with you:"},{links:true},{text:"Brother Smith: Watch One, Do One, Teach One. The videos are your Watch One — this game and the lab are your Do One. The teaching? That's what those relay signatures are for."}]},
+   {label:"\u2b05 Back to work",steps:[]},
+  ]}];
+}
+
+/* ============================== CORE ============================== */
+const cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+ctx.imageSmoothingEnabled = true;
+const state = {
+  map:"lab", px:490, py:430, dir:"down", frame:0, moving:false,
+  inv:new Set(), done:new Set(), given:new Set(),
+  qstage:{}, qprog:{}, gear:new Set(), started:false, girl:false, steps:0, wrongs:0
+};
+ORDER.forEach(q=>{state.qstage[q]="new"; state.qprog[q]=0;});
+
+/* ---------- scenery ---------- */
+function labFurniture(){ return [
+  {x:60,y:80,w:180,h:60,c:"#5f4b35",label:"SAMPLE BINS",kind:"bins"},
+  {x:360,y:60,w:220,h:60,c:"#707876",label:"OVENS & WASH",kind:"oven"},
+  {x:640,y:70,w:200,h:60,c:"#4f5a66",label:"SIEVE SHAKER",kind:"sieve"},
+  {x:900,y:230,w:60,h:140,c:"#5f4b35",label:"",kind:"table"},
+  {x:560,y:390,w:180,h:50,c:"#3f5f72",label:"SG BATH",kind:"bath"},
+  {x:240,y:390,w:160,h:50,c:"#5f5f38",label:"SE CYLINDERS",kind:"cyl"},
+  {x:56,y:220,w:100,h:116,c:"#6b4f30",label:"TEST METHOD LIBRARY",kind:"library"},
+  {x:455,y:500,w:96,h:40,c:"#3a4048",label:"EQUIPMENT CAGE",kind:"cage"},
+  {x:60,y:520,w:340,h:20,c:"#4d4d56",label:"SOILS BENCH",kind:"bench"},
+  {x:640,y:520,w:300,h:20,c:"#463a2d",label:"ASPHALT BENCH",kind:"bench"},
+];}
+function siteFurniture(){ return [
+  {x:60,y:60,w:300,h:80,c:"#9298a0",label:"",kind:"truck"},
+  {x:640,y:70,w:180,h:50,c:"#7d6d4d",label:"FORMWORK",kind:"form"},
+  {x:250,y:400,w:140,h:40,c:"#9ea396",label:"CURE BOXES",kind:"cure"},
+  {x:520,y:300,w:150,h:40,c:"#a88f5d",label:"SOIL PAD",kind:"pad"},
+  {x:60,y:340,w:120,h:40,c:"#4d4d56",label:"TOOL CRIB",kind:"crib"},
+];}
+const DOOR = { lab:{x:944,y:400,w:40,h:90}, site:{x:8,y:250,w:40,h:90} };
+function solids(){ return (state.map==="lab"?labFurniture():siteFurniture()).map(o=>({x:o.x,y:o.y,w:o.w,h:o.h})); }
+
+function rr(g,x,y,w,h,r){ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); }
+
+/* ---------- illustrated people ---------- */
+function drawPerson(g,x,y,pal,opts){
+  opts=opts||{}; g.save(); g.translate(x,y);
+  const bob = opts.bob? Math.sin(Date.now()/340+x)*1.6 : 0;
+  // ground shadow
+  g.fillStyle="#00000038"; g.beginPath(); g.ellipse(0,32,15,5,0,0,7); g.fill();
+  g.translate(0,bob);
+  const swing = opts.walk? Math.sin(Date.now()/110)*5:0;
+  // legs
+  g.strokeStyle=pal[1]; g.lineWidth=6; g.lineCap="round";
+  g.beginPath(); g.moveTo(-5,14); g.lineTo(-5+swing*.4,29); g.stroke();
+  g.beginPath(); g.moveTo(5,14); g.lineTo(5-swing*.4,29); g.stroke();
+  // body
+  g.fillStyle=pal[0]; rr(g,-11,-4,22,22,7); g.fill();
+  g.fillStyle="#ffffff22"; rr(g,-11,-4,22,7,7); g.fill();
+  // arms
+  g.strokeStyle=pal[0]; g.lineWidth=5;
+  g.beginPath(); g.moveTo(-11,2); g.lineTo(-15,12+swing*.3); g.stroke();
+  g.beginPath(); g.moveTo(11,2); g.lineTo(15,12-swing*.3); g.stroke();
+  if(opts.tie){ g.fillStyle="#1f5fb0";
+    g.beginPath(); g.moveTo(0,-3); g.lineTo(3,1); g.lineTo(0,14); g.lineTo(-3,1); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(-3,-4); g.lineTo(3,-4); g.lineTo(0,0); g.closePath(); g.fill();
+    g.fillStyle="#dcdad2"; g.beginPath(); g.moveTo(-6,-4); g.lineTo(-2,-4); g.lineTo(-5,1); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(6,-4); g.lineTo(2,-4); g.lineTo(5,1); g.closePath(); g.fill(); }
+  // head
+  g.fillStyle=pal[2]; g.beginPath(); g.arc(0,-15,10,0,7); g.fill();
+  // hair / hardhat
+  if(opts.hat){ g.fillStyle="#f2c200"; g.beginPath(); g.arc(0,-17,10.5,Math.PI,0); g.fill();
+    rr(g,-13,-18,26,4,2); g.fill(); }
+  else { g.fillStyle=pal[3]; g.beginPath(); g.arc(0,-17,10,Math.PI*0.95,Math.PI*2.05); g.fill();
+    if(opts.long){ g.fillRect(-11,-18,4,14); g.fillRect(7,-18,4,14); } }
+  // face
+  g.fillStyle="#16191f";
+  g.beginPath(); g.arc(-3.5,-14,1.4,0,7); g.fill();
+  g.beginPath(); g.arc(3.5,-14,1.4,0,7); g.fill();
+  g.strokeStyle="#16191f"; g.lineWidth=1.2;
+  g.beginPath(); g.arc(0,-11,3,0.15*Math.PI,0.85*Math.PI); g.stroke();
+  if(opts.glasses){ g.strokeStyle="#2c313a"; g.lineWidth=1.6;
+    g.strokeRect(-6.5,-16.5,5.5,4.5); g.strokeRect(1,-16.5,5.5,4.5);
+    g.beginPath(); g.moveTo(-1,-14.5); g.lineTo(1,-14.5); g.stroke(); }
+  g.restore();
+}
+
+/* ---------- title pick ---------- */
 (function(){
-  "use strict";
-  var DATA_KEY = "ce210_passoff_v3";
-  var DEFAULT_SKILLS = [
-    "Sampling (R 90)","Reducing / splitting (R 76)","Moisture (T 255)","Sieve analysis (T 27)",
-    "Fines by washing (T 11)","Coarse SG & absorption (T 85)","Fractured faces (T 335)","Sand equivalent (T 176)",
-    "Concrete sampling (TM 2)","Slump (T 119)","Air content (T 152)","Unit weight (T 121)","Concrete temperature (T 309)",
-    "Make cylinders (R 100)","Rice / Gmm (T 209)","Bulk SG asphalt (T 166)",
-    "Proctor (T 99)","Sand cone (T 191)","Nuclear gauge (T 310)",
-    "Family of curves (R 75)","One-point Proctor (T 272)","Asphalt nuclear density (T 355)"
-  ];
-  var DEMO_ROSTER = ["James Benner", "Joshua Christensen", "Mfundo Dlamini", "Abbey Eichmann", "Eduarda Iunes", "Ammon Obbanya", "Gadiel Perez", "Zee Vieira Fernandes"];
-  var DEMO_RECORDS = {"James Benner": {"Sampling (R 90)": {"coachedBy": "Ammon Obbanya", "passedOffBy": "Abbey Eichmann", "date": "4/28", "q": "", "activeBy": ""}, "Reducing / splitting (R 76)": {"coachedBy": "Zee Vieira Fernandes", "passedOffBy": "Abbey Eichmann", "date": "4/30", "q": "", "activeBy": ""}, "Moisture (T 255)": {"coachedBy": "Eduarda Iunes", "passedOffBy": "Zee Vieira Fernandes", "date": "5/5", "q": "", "activeBy": ""}, "Sieve analysis (T 27)": {"coachedBy": "", "passedOffBy": "", "date": "", "q": "coachWait", "activeBy": ""}}, "Joshua Christensen": {"Sampling (R 90)": {"coachedBy": "Abbey Eichmann", "passedOffBy": "Ammon Obbanya", "date": "4/28", "q": "", "activeBy": ""}, "Reducing / splitting (R 76)": {"coachedBy": "Ammon Obbanya", "passedOffBy": "Abbey Eichmann", "date": "4/30", "q": "", "activeBy": ""}, "Moisture (T 255)": {"coachedBy": "Zee Vieira Fernandes", "passedOffBy": "Abbey Eichmann", "date": "5/5", "q": "", "activeBy": ""}, "Sieve analysis (T 27)": {"coachedBy": "Gadiel Perez", "passedOffBy": "Zee Vieira Fernandes", "date": "5/7", "q": "", "activeBy": ""}, "Coarse SG & absorption (T 85)": {"coachedBy": "Abbey Eichmann", "passedOffBy": "Ammon Obbanya", "date": "5/12", "q": "", "activeBy": ""}, "Fractured faces (T 335)": {"coachedBy": "Ammon Obbanya", "passedOffBy": "Zee Vieira Fernandes", "date": "5/14", "q": "", "activeBy": ""}, "Sand equivalent (T 176)": {"coachedBy": "Zee Vieira Fernandes", "passedOffBy": "Abbey Eichmann", "date": "5/19", "q": "", "activeBy": ""}, "Slump (T 119)": {"coachedBy": "Gadiel Perez", "passedOffBy": "Ammon Obbanya", "date": "5/21", "q": "", "activeBy": ""}, "Air content (T 152)": {"coachedBy": "Abbey Eichmann", "passedOffBy": "Zee Vieira Fernandes", "date": "5/26", "q": "", "activeBy": ""}}, "Mfundo Dlamini": {"Sampling (R 90)": {"coachedBy": "Abbey Eichmann", "passedOffBy": "Ammon Obbanya", "date": "4/28", "q": "", "activeBy": ""}, "Reducing / splitting (R 76)": {"coachedBy": "Ammon Obbanya", "passedOffBy": "Zee Vieira Fernandes", "date": "4/30", "q": "", "activeBy": ""}, "Moisture (T 255)": {"coachedBy": "Zee Vieira Fernandes", "passedOffBy": "Abbey Eichmann", "date": "5/5", "q": "", "activeBy": ""}, "Sieve analysis (T 27)": {"coachedBy": "Gadiel Perez", "passedOffBy": "Ammon Obbanya", "date": "5/7", "q": "", "activeBy": ""}, "Coarse SG & absorption (T 85)": {"coachedBy": "Zee Vieira Fernandes", "passedOffBy": "", "date": "", "q": "passWait", "activeBy": ""}}, "Abbey Eichmann": {"Sampling (R 90)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "4/28", "q": "", "activeBy": ""}, "Reducing / splitting (R 76)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "4/30", "q": "", "activeBy": ""}, "Moisture (T 255)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/5", "q": "", "activeBy": ""}, "Sieve analysis (T 27)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/7", "q": "", "activeBy": ""}, "Coarse SG & absorption (T 85)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/12", "q": "", "activeBy": ""}, "Fractured faces (T 335)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/14", "q": "", "activeBy": ""}, "Sand equivalent (T 176)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/19", "q": "", "activeBy": ""}, "Slump (T 119)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/21", "q": "", "activeBy": ""}, "Air content (T 152)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/26", "q": "", "activeBy": ""}, "Unit weight (T 121)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/28", "q": "", "activeBy": ""}, "Concrete temperature (T 309)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "6/4", "q": "", "activeBy": ""}, "Make cylinders (R 100)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "6/9", "q": "", "activeBy": ""}, "Rice / Gmm (T 209)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "6/16", "q": "", "activeBy": ""}, "Bulk SG asphalt (T 166)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "6/23", "q": "", "activeBy": ""}}, "Eduarda Iunes": {"Sampling (R 90)": {"coachedBy": "Ammon Obbanya", "passedOffBy": "Abbey Eichmann", "date": "4/28", "q": "", "activeBy": ""}, "Reducing / splitting (R 76)": {"coachedBy": "Zee Vieira Fernandes", "passedOffBy": "Ammon Obbanya", "date": "4/30", "q": "", "activeBy": ""}, "Moisture (T 255)": {"coachedBy": "Joshua Christensen", "passedOffBy": "Zee Vieira Fernandes", "date": "5/5", "q": "", "activeBy": ""}, "Sieve analysis (T 27)": {"coachedBy": "Abbey Eichmann", "passedOffBy": "Ammon Obbanya", "date": "5/7", "q": "", "activeBy": ""}, "Coarse SG & absorption (T 85)": {"coachedBy": "Ammon Obbanya", "passedOffBy": "Abbey Eichmann", "date": "5/12", "q": "", "activeBy": ""}, "Fractured faces (T 335)": {"coachedBy": "Zee Vieira Fernandes", "passedOffBy": "Abbey Eichmann", "date": "5/14", "q": "", "activeBy": ""}, "Sand equivalent (T 176)": {"coachedBy": "Joshua Christensen", "passedOffBy": "Zee Vieira Fernandes", "date": "5/19", "q": "", "activeBy": ""}, "Slump (T 119)": {"coachedBy": "Abbey Eichmann", "passedOffBy": "Ammon Obbanya", "date": "5/21", "q": "", "activeBy": ""}}, "Ammon Obbanya": {"Sampling (R 90)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "4/28", "q": "", "activeBy": ""}, "Reducing / splitting (R 76)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "4/30", "q": "", "activeBy": ""}, "Moisture (T 255)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/5", "q": "", "activeBy": ""}, "Sieve analysis (T 27)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/7", "q": "", "activeBy": ""}, "Coarse SG & absorption (T 85)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/12", "q": "", "activeBy": ""}, "Fractured faces (T 335)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/14", "q": "", "activeBy": ""}, "Sand equivalent (T 176)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/19", "q": "", "activeBy": ""}, "Slump (T 119)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/21", "q": "", "activeBy": ""}, "Air content (T 152)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/26", "q": "", "activeBy": ""}, "Unit weight (T 121)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/28", "q": "", "activeBy": ""}, "Concrete temperature (T 309)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "6/4", "q": "", "activeBy": ""}, "Make cylinders (R 100)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "6/9", "q": "", "activeBy": ""}, "Rice / Gmm (T 209)": {"coachedBy": "Instructor", "passedOffBy": "", "date": "", "q": "passActive", "activeBy": "Abbey Eichmann"}}, "Gadiel Perez": {"Sampling (R 90)": {"coachedBy": "Ammon Obbanya", "passedOffBy": "Zee Vieira Fernandes", "date": "4/28", "q": "", "activeBy": ""}, "Reducing / splitting (R 76)": {"coachedBy": "Zee Vieira Fernandes", "passedOffBy": "Abbey Eichmann", "date": "4/30", "q": "", "activeBy": ""}, "Moisture (T 255)": {"coachedBy": "Joshua Christensen", "passedOffBy": "Ammon Obbanya", "date": "5/5", "q": "", "activeBy": ""}, "Sieve analysis (T 27)": {"coachedBy": "Abbey Eichmann", "passedOffBy": "Zee Vieira Fernandes", "date": "5/7", "q": "", "activeBy": ""}, "Coarse SG & absorption (T 85)": {"coachedBy": "Ammon Obbanya", "passedOffBy": "Abbey Eichmann", "date": "5/12", "q": "", "activeBy": ""}, "Fractured faces (T 335)": {"coachedBy": "Zee Vieira Fernandes", "passedOffBy": "Ammon Obbanya", "date": "5/14", "q": "", "activeBy": ""}, "Sand equivalent (T 176)": {"coachedBy": "Joshua Christensen", "passedOffBy": "Zee Vieira Fernandes", "date": "5/19", "q": "", "activeBy": ""}, "Slump (T 119)": {"coachedBy": "Abbey Eichmann", "passedOffBy": "Ammon Obbanya", "date": "5/21", "q": "", "activeBy": ""}, "Air content (T 152)": {"coachedBy": "", "passedOffBy": "", "date": "", "q": "coachActive", "activeBy": "Zee Vieira Fernandes"}}, "Zee Vieira Fernandes": {"Sampling (R 90)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "4/28", "q": "", "activeBy": ""}, "Reducing / splitting (R 76)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "4/30", "q": "", "activeBy": ""}, "Moisture (T 255)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/5", "q": "", "activeBy": ""}, "Sieve analysis (T 27)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/7", "q": "", "activeBy": ""}, "Coarse SG & absorption (T 85)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/12", "q": "", "activeBy": ""}, "Fractured faces (T 335)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/14", "q": "", "activeBy": ""}, "Sand equivalent (T 176)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/19", "q": "", "activeBy": ""}, "Slump (T 119)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/21", "q": "", "activeBy": ""}, "Air content (T 152)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/26", "q": "", "activeBy": ""}, "Unit weight (T 121)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "5/28", "q": "", "activeBy": ""}, "Concrete temperature (T 309)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "6/4", "q": "", "activeBy": ""}, "Make cylinders (R 100)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "6/9", "q": "", "activeBy": ""}, "Rice / Gmm (T 209)": {"coachedBy": "Instructor", "passedOffBy": "TA", "date": "6/16", "q": "", "activeBy": ""}, "Bulk SG asphalt (T 166)": {"coachedBy": "Instructor", "passedOffBy": "", "date": "", "q": "passWait", "activeBy": ""}}};
-  var state = {
-    className:"CE 210 — Pass-Off Tracker (example data)", roster:DEMO_ROSTER.slice(), staff:["Brother Smith"], skills:DEFAULT_SKILLS.slice(),
-    config:{ ecPerCoach:1, ecPerProctor:1, instructorCode:"" }, records:JSON.parse(JSON.stringify(DEMO_RECORDS))
+  const m=document.querySelector("#pickM canvas").getContext("2d");
+  const f=document.querySelector("#pickF canvas").getContext("2d");
+  m.imageSmoothingEnabled=f.imageSmoothingEnabled=true;
+  function loop(){
+    m.clearRect(0,0,64,80); f.clearRect(0,0,64,80);
+    drawPerson(m,32,42,["#1f5fb0","#3b3f46","#e8b48c","#3a2a10"],{bob:1});
+    drawPerson(f,32,42,["#1c7a4d","#2e3238","#c88a5a","#5a3c1e"],{bob:1,long:1});
+    if(!state.started) requestAnimationFrame(loop);
+  } loop();
+  document.getElementById("pickM").onclick=()=>{state.girl=false; sel("pickM");};
+  document.getElementById("pickF").onclick=()=>{state.girl=true; sel("pickF");};
+  function sel(id){document.querySelectorAll(".charpick").forEach(e=>e.classList.remove("sel"));document.getElementById(id).classList.add("sel");}
+  sel("pickM");
+  document.getElementById("startbtn").onclick=()=>{
+    document.getElementById("title").style.display="none"; state.started=true; beep(440,.08); beep(660,.1,.09);
   };
-  var currentView="student", selectedStudent="", manualStudent="", unlocked=false;
-  var soundOn=true, audioCtx=null, lastWait=0, lastActiveSel=0;
-
-  var Store = {
-    hasWS:function(){ try{ return !!(window.storage && typeof window.storage.get==="function"); }catch(e){ return false; } },
-    get:async function(k){ if(this.hasWS()){ try{ var r=await window.storage.get(k,true); return r?r.value:null; }catch(e){ return null; } } try{ return localStorage.getItem(k); }catch(e){ return null; } },
-    set:async function(k,v){ if(this.hasWS()){ try{ await window.storage.set(k,v,true); return true; }catch(e){ console.error(e); return false; } } try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } },
-    mode:function(){ return this.hasWS()?"shared":"local"; }
-  };
-
-  function ensureShape(d){
-    d=d||{};
-    if(!d.className) d.className=state.className;
-    if(!Array.isArray(d.roster)) d.roster=[];
-    if(!Array.isArray(d.staff)) d.staff=["Brother Smith"];
-    if(!Array.isArray(d.skills)||!d.skills.length) d.skills=DEFAULT_SKILLS.slice();
-    if(!d.config) d.config={};
-    if(typeof d.config.ecPerCoach!=="number") d.config.ecPerCoach=1;
-    if(typeof d.config.ecPerProctor!=="number") d.config.ecPerProctor=1;
-    if(typeof d.config.instructorCode!=="string") d.config.instructorCode="";
-    if(!d.records||typeof d.records!=="object") d.records={};
-    return d;
-  }
-  async function loadAll(){ var raw=await Store.get(DATA_KEY); if(raw){ try{ state=ensureShape(JSON.parse(raw)); }catch(e){ state=ensureShape(state); } } else { state=ensureShape(state); await Store.set(DATA_KEY, JSON.stringify(state)); } }
-  async function saveAll(){ await Store.set(DATA_KEY, JSON.stringify(state)); }
-  async function saveStudentRecord(name){
-    var raw=await Store.get(DATA_KEY), latest=state;
-    if(raw){ try{ latest=ensureShape(JSON.parse(raw)); }catch(e){ latest=state; } }
-    latest.records[name]=state.records[name]; state=latest;
-    await Store.set(DATA_KEY, JSON.stringify(latest));
-  }
-
-  function isStudentName(v){ return v && v!=="—" && v!=="Instructor" && v!=="TA" && state.roster.indexOf(v)!==-1; }
-  function isStaff(v){ return !!v && state.staff.indexOf(v)!==-1; }
-  function getR(stu,sk){ var rec=state.records[stu]||(state.records[stu]={}); return rec[sk]||(rec[sk]={coachedBy:"",passedOffBy:"",date:"",q:"",activeBy:""}); }
-  function passedOff(name,sk){ var r=(state.records[name]||{})[sk]; return !!(r && r.passedOffBy && r.passedOffBy!=="—"); }
-  function eligibleCoaches(sk,exclude){ var l=state.staff.concat(["Instructor","TA"]); state.roster.forEach(function(n){ if(n!==exclude && passedOff(n,sk)) l.push(n); }); return l; }
-  function eligibleProctors(sk,student,coach){ var base=state.staff.concat(["Instructor","TA"]).concat(state.roster.filter(function(n){ return passedOff(n,sk); })); return base.filter(function(n){ return n!==student && n!==coach; }); }
-
-  function stageOf(r){
-    if(!r) return "none";
-    if(r.passedOffBy&&r.passedOffBy!=="—") return "done";
-    if(r.q==="passActive") return "passActive";
-    if(r.q==="passWait") return "passWait";
-    if(r.coachedBy&&r.coachedBy!=="—") return "ready";
-    if(r.q==="coachActive") return "coachActive";
-    if(r.q==="coachWait") return "coachWait";
-    return "none";
-  }
-
-  function statsFor(name){
-    var rec=state.records[name]||{}, passOffs=0;
-    state.skills.forEach(function(sk){ var r=rec[sk]; if(r&&r.passedOffBy&&r.passedOffBy!=="—") passOffs++; });
-    var coaching=0, proctoring=0;
-    Object.keys(state.records).forEach(function(stu){ var sr=state.records[stu]||{}; state.skills.forEach(function(sk){ var r=sr[sk]; if(!r) return; if(r.coachedBy===name) coaching++; if(r.passedOffBy===name) proctoring++; }); });
-    var ecC=coaching*(state.config.ecPerCoach||0), ecP=proctoring*(state.config.ecPerProctor||0);
-    return { passOffs:passOffs, coaching:coaching, proctoring:proctoring, ecCoach:ecC, ecProctor:ecP, ec:ecC+ecP };
-  }
-  function conflicts(){ var out=[]; Object.keys(state.records).forEach(function(stu){ var sr=state.records[stu]||{}; state.skills.forEach(function(sk){ var r=sr[sk]; if(!r) return; if(r.coachedBy && r.coachedBy===r.passedOffBy && isStudentName(r.coachedBy)) out.push({student:stu,skill:sk,who:r.coachedBy}); }); }); return out; }
-
-  function ensureAudio(){ try{ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx&&audioCtx.state==="suspended") audioCtx.resume(); }catch(e){} }
-  function playPing(){ if(!soundOn) return; ensureAudio(); if(!audioCtx) return; try{ var o=audioCtx.createOscillator(), g=audioCtx.createGain(), t=audioCtx.currentTime; o.type="sine"; o.frequency.setValueAtTime(880,t); o.frequency.exponentialRampToValueAtTime(1320,t+0.08); o.connect(g); g.connect(audioCtx.destination); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.22,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.4); o.start(t); o.stop(t+0.42); }catch(e){} }
-  function waitingCount(){ var c=0; state.roster.forEach(function(stu){ state.skills.forEach(function(sk){ var r=(state.records[stu]||{})[sk]; if(r&&(r.q==="coachWait"||r.q==="passWait")) c++; }); }); return c; }
-  function activeForStudent(name){ var c=0, rec=state.records[name]||{}; state.skills.forEach(function(sk){ var r=rec[sk]; if(r&&(r.q==="coachActive"||r.q==="passActive")) c++; }); return c; }
-  function pingCheck(){ if(currentView==="queues"){ var c=waitingCount(); if(c>lastWait) playPing(); lastWait=c; } else if(currentView==="student"&&selectedStudent){ var a=activeForStudent(selectedStudent); if(a>lastActiveSel) playPing(); lastActiveSel=a; } }
-  function buildChain(student, sk){
-    var back=[student], seen={}, cur=student, guard=0; seen[student]=1;
-    while(guard++<40){ var r=(state.records[cur]||{})[sk], c=r&&r.coachedBy; if(!c||c==="—") break; if(c==="Instructor"||c==="TA"){ back.unshift(c); break; } if(seen[c]) break; seen[c]=1; back.unshift(c); cur=c; }
-    var fwd=[]; state.roster.forEach(function(n){ var r=(state.records[n]||{})[sk]; if(r&&r.coachedBy===student) fwd.push(n); });
-    return { back:back, fwd:fwd };
-  }
-
-  var app=document.getElementById("app");
-  function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
-  function optlist(arr,sel){ return arr.map(function(o){ return '<option'+(o===sel?' selected':'')+'>'+esc(o)+'</option>'; }).join(""); }
-
-  // ---------- actions ----------
-  async function act(kind, student, skill, who){
-    var r=getR(student,skill);
-    if(kind==="reqCoach") r.q="coachWait";
-    else if(kind==="reqPass") r.q="passWait";
-    else if(kind==="cancel"){ r.q=""; r.activeBy=""; }
-    else if(kind==="claimCoach"){ if(!who){ alert("Pick who is coaching."); return; } r.q="coachActive"; r.activeBy=who; }
-    else if(kind==="doneCoach"){ r.coachedBy=r.activeBy||r.coachedBy; r.q=""; r.activeBy=""; }
-    else if(kind==="claimProct"){ if(!who){ alert("Pick who is proctoring."); return; } if(who===r.coachedBy){ alert("The proctor can't be the coach who taught them."); return; } r.q="passActive"; r.activeBy=who; }
-    else if(kind==="passYes"){ r.passedOffBy=r.activeBy||r.passedOffBy; r.q=""; r.activeBy=""; var d=new Date(); r.date=(d.getMonth()+1)+"/"+d.getDate(); }
-    else if(kind==="passNo"){ r.q=""; r.activeBy=""; }
-    await saveStudentRecord(student); render();
-  }
-
-  // ---------- staff console ----------
-  function staffConsoleHTML(me){
-    var coachWait=[],passWait=[],myCoach=[],myPass=[];
-    state.roster.forEach(function(stu){ state.skills.forEach(function(sk){ var r=(state.records[stu]||{})[sk]; if(!r) return; var s=stageOf(r);
-      if(s==="coachWait") coachWait.push({stu:stu,sk:sk,r:r});
-      else if(s==="passWait") passWait.push({stu:stu,sk:sk,r:r});
-      else if(s==="coachActive"&&r.activeBy===me) myCoach.push({stu:stu,sk:sk,r:r});
-      else if(s==="passActive"&&r.activeBy===me) myPass.push({stu:stu,sk:sk,r:r}); }); });
-    var h='<div class="card"><h2>Signed in as '+esc(me)+' — teacher</h2><p class="muted" style="margin-top:0">Pick students to coach or pass off. Staff don\'t appear on the leaderboard.</p></div>';
-    h+='<div class="card"><h2>✋ Pass-off queue — pick someone to pass off</h2>';
-    if(!passWait.length) h+='<div class="empty">No one is waiting to pass off.</div>';
-    passWait.forEach(function(it){ var coached=it.r.coachedBy, blocked=(coached===me);
-      h+='<div class="qrow"><span class="who">'+esc(it.stu)+'</span><span class="sk">· '+esc(it.sk)+'</span>'+(coached?' <span class="sk">(coached by '+esc(coached)+')</span>':'')+'<span class="claim">'+(blocked?'<span class="muted">you coached them — let someone else proctor</span>':'<button class="btn amber sm" data-act="claimProct" data-student="'+esc(it.stu)+'" data-skill="'+esc(it.sk)+'" data-who="'+esc(me)+'">Proctor this student</button>')+'</span></div>'; });
-    if(myPass.length){ h+='<h3>You\'re passing off now</h3>'; myPass.forEach(function(it){ h+='<div class="qrow"><span><b>'+esc(it.stu)+'</b></span><span class="sk">· '+esc(it.sk)+'</span><span class="claim"><button class="btn go sm" data-act="passYes" data-student="'+esc(it.stu)+'" data-skill="'+esc(it.sk)+'">Passed ✓</button><button class="btn sm" data-act="passNo" data-student="'+esc(it.stu)+'" data-skill="'+esc(it.sk)+'">Not yet</button></span></div>'; }); }
-    h+='</div>';
-    h+='<div class="card"><h2>🙋 Coaching queue — pick someone to coach</h2>';
-    if(!coachWait.length) h+='<div class="empty">No one is waiting for a coach.</div>';
-    coachWait.forEach(function(it){ h+='<div class="qrow"><span class="who">'+esc(it.stu)+'</span><span class="sk">· '+esc(it.sk)+'</span><span class="claim"><button class="btn go sm" data-act="claimCoach" data-student="'+esc(it.stu)+'" data-skill="'+esc(it.sk)+'" data-who="'+esc(me)+'">Coach this student</button></span></div>'; });
-    if(myCoach.length){ h+='<h3>You\'re coaching now</h3>'; myCoach.forEach(function(it){ h+='<div class="qrow"><span><b>'+esc(it.stu)+'</b></span><span class="sk">· '+esc(it.sk)+'</span><span class="claim"><button class="btn primary sm" data-act="doneCoach" data-student="'+esc(it.stu)+'" data-skill="'+esc(it.sk)+'">Done coaching</button></span></div>'; }); }
-    h+='</div>';
-    return h;
-  }
-
-  // ---------- student view ----------
-  function renderStudent(){
-    if(!state.roster.length){ app.innerHTML='<div class="card"><h2>No class list yet</h2><p class="muted">Go to <b>Setup</b> and paste your roster.</p></div>'; return; }
-    var rosterOpts=state.roster.map(function(n){ return '<option'+(n===selectedStudent?' selected':'')+'>'+esc(n)+'</option>'; }).join("");
-    var staffOpts=state.staff.map(function(n){ return '<option'+(n===selectedStudent?' selected':'')+'>'+esc(n)+'</option>'; }).join("");
-    var html='<div class="card"><label class="fld">Who are you?</label><select data-change="whoami"><option value="">— select your name —</option><optgroup label="Students">'+rosterOpts+'</optgroup>'+(staffOpts?'<optgroup label="Staff">'+staffOpts+'</optgroup>':'')+'</select></div>';
-    if(selectedStudent && isStaff(selectedStudent)){ app.innerHTML=html+staffConsoleHTML(selectedStudent); return; }
-    if(selectedStudent){
-      var st=statsFor(selectedStudent);
-      html+='<div class="statbox">'+
-        '<div class="stat"><div class="n">'+st.passOffs+' / '+state.skills.length+'</div><div class="l">Passed off</div></div>'+
-        '<div class="stat"><div class="n">'+st.coaching+'</div><div class="l">Coached ('+st.ecCoach+' EC)</div></div>'+
-        '<div class="stat"><div class="n">'+st.proctoring+'</div><div class="l">Proctored ('+st.ecProctor+' EC)</div></div>'+
-        '<div class="stat"><div class="n">'+st.ec+'</div><div class="l">Total extra credit</div></div></div>';
-      html+='<div class="card"><h2>Your tests</h2><div class="grid-wrap"><table><thead><tr><th>Skill</th><th>Status</th><th>Coach / proctor</th><th>What to do</th></tr></thead><tbody>';
-      state.skills.forEach(function(sk){
-        var r=getR(selectedStudent,sk), s=stageOf(r), pill="", info="", action="";
-        var dS='data-student="'+esc(selectedStudent)+'" data-skill="'+esc(sk)+'"';
-        if(s==="none"){ pill='<span class="pill p-none">not started</span>'; action='<button class="btn go sm" data-act="reqCoach" '+dS+'>Request a coach</button> <button class="btn amber sm" data-act="reqPass" '+dS+'>I\'m ready to pass off</button>'; }
-        else if(s==="coachWait"){ pill='<span class="pill p-wait">waiting for coach</span>'; action='<span class="muted">in the coach queue…</span> <button class="btn sm" data-act="cancel" '+dS+'>Cancel</button>'; }
-        else if(s==="coachActive"){ pill='<span class="pill p-prog">being coached</span>'; info='by <b>'+esc(r.activeBy)+'</b>'; action='<span class="muted">your coach will mark this done</span>'; }
-        else if(s==="ready"){ pill='<span class="pill p-ready">coached</span>'; info='by <b>'+esc(r.coachedBy)+'</b>'; action='<button class="btn amber sm" data-act="reqPass" '+dS+'>I\'m ready to pass off</button>'; }
-        else if(s==="passWait"){ pill='<span class="pill p-wait">waiting to pass off</span>'; info=r.coachedBy?'coached by <b>'+esc(r.coachedBy)+'</b>':''; action='<span class="muted">in the pass-off queue…</span> <button class="btn sm" data-act="cancel" '+dS+'>Cancel</button>'; }
-        else if(s==="passActive"){ pill='<span class="pill p-prog">passing off</span>'; info='with <b>'+esc(r.activeBy)+'</b>'; action='<span class="muted">proctor will record the result</span>'; }
-        else if(s==="done"){ pill='<span class="pill p-done">✓ passed off</span>'; info='by <b>'+esc(r.passedOffBy)+'</b>'+(r.coachedBy?', coached by '+esc(r.coachedBy):''); action='<span class="muted">now you can coach others on this →</span>'; }
-        html+='<tr><td><b>'+esc(sk)+'</b></td><td>'+pill+'</td><td>'+info+'</td><td><div class="actions">'+action+'</div></td></tr>';
-      });
-      html+='</tbody></table></div></div>';
-      var chainRows="";
-      state.skills.forEach(function(sk){
-        var r=getR(selectedStudent,sk), ch=buildChain(selectedStudent,sk);
-        var hasData=(r.coachedBy&&r.coachedBy!=="—")||ch.fwd.length||(r.passedOffBy&&r.passedOffBy!=="—");
-        if(!hasData) return;
-        var parts=ch.back.map(function(p){ return p===selectedStudent?'<b>'+esc(p)+' (you)</b>':esc(p); }).join(" → ");
-        if(ch.fwd.length) parts+=' → <span style="color:var(--green);font-weight:700">taught '+ch.fwd.map(esc).join(", ")+'</span>';
-        var po=(r.passedOffBy&&r.passedOffBy!=="—")?' <span class="muted">· passed off by '+esc(r.passedOffBy)+'</span>':'';
-        chainRows+='<div style="padding:8px 0;border-bottom:1px solid #eef0f2;font-size:13px"><b>'+esc(sk)+'</b><br>🔗 '+parts+po+'</div>';
-      });
-      if(chainRows) html+='<div class="card"><h2>Your relay chains</h2><p class="muted" style="margin-top:0">Who taught you on each test, traced back to the first demo — and who you taught forward.</p>'+chainRows+'</div>';
-    }
-    app.innerHTML=html;
-  }
-
-  // ---------- queues view ----------
-  function renderQueues(){
-    if(!state.roster.length){ app.innerHTML='<div class="card"><p class="muted">Add your roster in Setup first.</p></div>'; return; }
-    var coachWait=[],coachActive=[],passWait=[],passActive=[];
-    state.roster.forEach(function(stu){ state.skills.forEach(function(sk){ var r=(state.records[stu]||{})[sk]; if(!r) return; var s=stageOf(r); if(s==="coachWait")coachWait.push({stu:stu,sk:sk,r:r}); else if(s==="coachActive")coachActive.push({stu:stu,sk:sk,r:r}); else if(s==="passWait")passWait.push({stu:stu,sk:sk,r:r}); else if(s==="passActive")passActive.push({stu:stu,sk:sk,r:r}); }); });
-    var uid=0;
-    var html='<div class="card"><h2>🙋 Coaching queue</h2>';
-    if(!coachWait.length) html+='<div class="empty">No one is waiting for a coach.</div>';
-    coachWait.forEach(function(it){ var id="csel"+(uid++); var opts=eligibleCoaches(it.sk,it.stu); html+='<div class="qrow"><span class="who">'+esc(it.stu)+'</span><span class="sk">· '+esc(it.sk)+'</span><span class="claim"><span class="muted">coach:</span><select id="'+id+'">'+optlist(opts,opts[0])+'</select><button class="btn go sm" data-act="claimCoach" data-student="'+esc(it.stu)+'" data-skill="'+esc(it.sk)+'" data-sel="'+id+'">Claim</button></span></div>'; });
-    html+='<h3>Being coached now</h3>';
-    if(!coachActive.length) html+='<div class="empty">—</div>';
-    coachActive.forEach(function(it){ html+='<div class="qrow"><span><b>'+esc(it.r.activeBy)+'</b> is coaching <b>'+esc(it.stu)+'</b></span><span class="sk">· '+esc(it.sk)+'</span><span class="claim"><button class="btn primary sm" data-act="doneCoach" data-student="'+esc(it.stu)+'" data-skill="'+esc(it.sk)+'">Done coaching</button></span></div>'; });
-    html+='</div>';
-
-    html+='<div class="card"><h2>✋ Pass-off queue</h2>';
-    if(!passWait.length) html+='<div class="empty">No one is waiting to pass off.</div>';
-    passWait.forEach(function(it){ var id="psel"+(uid++); var opts=eligibleProctors(it.sk,it.stu,it.r.coachedBy); var cb=it.r.coachedBy?' <span class="sk">(coached by '+esc(it.r.coachedBy)+')</span>':''; html+='<div class="qrow"><span class="who">'+esc(it.stu)+'</span><span class="sk">· '+esc(it.sk)+'</span>'+cb+'<span class="claim"><span class="muted">proctor:</span><select id="'+id+'">'+optlist_or_empty(opts)+'</select><button class="btn amber sm" data-act="claimProct" data-student="'+esc(it.stu)+'" data-skill="'+esc(it.sk)+'" data-sel="'+id+'">Claim</button></span></div>'; });
-    html+='<h3>Passing off now</h3>';
-    if(!passActive.length) html+='<div class="empty">—</div>';
-    passActive.forEach(function(it){ html+='<div class="qrow"><span><b>'+esc(it.r.activeBy)+'</b> is passing off <b>'+esc(it.stu)+'</b></span><span class="sk">· '+esc(it.sk)+'</span><span class="claim"><button class="btn go sm" data-act="passYes" data-student="'+esc(it.stu)+'" data-skill="'+esc(it.sk)+'">Passed ✓</button><button class="btn sm" data-act="passNo" data-student="'+esc(it.stu)+'" data-skill="'+esc(it.sk)+'">Not yet</button></span></div>'; });
-    html+='</div>';
-    app.innerHTML=html;
-  }
-  function optlist_or_empty(opts){ if(!opts.length) return '<option value="">(no eligible proctor yet)</option>'; return optlist(opts,opts[0]); }
-
-  function gate(){ if(!state.config.instructorCode) return true; if(unlocked) return true; var c=prompt("Instructor code:"); if(c===state.config.instructorCode){ unlocked=true; return true; } alert("Incorrect code."); return false; }
-
-  // ---------- dashboard ----------
-  function renderDashboard(){
-    if(!gate()){ currentView="student"; setActive(); renderStudent(); return; }
-    if(!state.roster.length){ app.innerHTML='<div class="card"><p class="muted">Add your roster in Setup first.</p></div>'; return; }
-    var total=state.skills.length;
-    var prog=state.roster.map(function(n){ return {name:n, po:statsFor(n).passOffs}; });
-    prog.sort(function(a,b){ return b.po-a.po || a.name.localeCompare(b.name); });
-    var html='<div class="card"><h2>Class progress</h2>';
-    prog.forEach(function(p){ var pct=total?Math.round(p.po/total*100):0; html+='<div class="prow"><span class="pname">'+esc(p.name)+'</span><div class="pbar"><div class="pfill'+(pct<40?' low':'')+'" data-pct="'+pct+'" style="width:0%"></div></div><span class="pcount">'+p.po+' / '+total+'</span></div>'; });
-    html+='</div>';
-    html+='<div class="card"><h2>Status grid</h2><div class="grid-wrap"><table class="matrix"><thead><tr><th>Student</th><th class="skill">Tests passed</th>';
-    state.skills.forEach(function(sk){ html+='<th class="skill">'+esc(sk)+'</th>'; });
-    html+='</tr></thead><tbody>';
-    state.roster.forEach(function(n){ var rec=state.records[n]||{}, st=statsFor(n); html+='<tr><td class="name">'+esc(n)+'</td><td class="cell">'+st.passOffs+'</td>';
-      state.skills.forEach(function(sk){ var r=rec[sk], s=stageOf(r), m="", t=r?("coached by "+(r.coachedBy||"—")+", passed off by "+(r.passedOffBy||"—")):"";
-        if(s==="done")m='<span class="ok">✓</span>'; else if(s==="ready")m='<span class="half">◑</span>'; else if(s==="coachWait"||s==="passWait"||s==="coachActive"||s==="passActive")m='<span class="waitc">•</span>';
-        html+='<td class="cell" title="'+esc(t)+'">'+m+'</td>'; });
-      html+='</tr>'; });
-    html+='</tbody></table></div><p class="muted" style="margin-top:6px">✓ passed off · ◑ coached · • in a queue / in progress · hover for names.</p></div>';
-
-    var cf=conflicts();
-    if(cf.length){ html+='<div class="card"><h2>⚠ Coach = proctor flags</h2>'; cf.forEach(function(c){ html+='<div class="flag"><b>'+esc(c.student)+'</b> was coached <i>and</i> passed off by <b>'+esc(c.who)+'</b> on <b>'+esc(c.skill)+'</b> — re-check independently.</div>'; }); html+='</div>'; }
-
-    var rows=state.roster.map(function(n){ var s=statsFor(n); s.name=n; return s; });
-    rows.sort(function(a,b){ return b.passOffs-a.passOffs || b.ec-a.ec || a.name.localeCompare(b.name); });
-    html+='<div class="card"><h2>🏆 Leaderboard</h2><div class="grid-wrap"><table><thead><tr><th></th><th>Student</th><th>Passed off</th><th>Coached</th><th>Proctored</th><th>Extra credit</th></tr></thead><tbody>';
-    rows.forEach(function(r,i){ var rc=i<3?' r'+(i+1):''; html+='<tr><td><span class="rank'+rc+'">'+(i+1)+'</span></td><td><b>'+esc(r.name)+'</b></td><td>'+r.passOffs+'</td><td>'+r.coaching+'</td><td>'+r.proctoring+'</td><td><b>'+r.ec+'</b></td></tr>'; });
-    html+='</tbody></table></div><div style="margin-top:12px"><button class="btn" id="csvBtn">⬇ Export CSV</button></div></div>';
-
-    // manual fix
-    html+='<div class="card"><h2>Manual entry / fix</h2><label class="fld">Pick a student to edit directly</label><select data-change="manualpick"><option value="">—</option>'+
-      state.roster.map(function(n){ return '<option'+(n===manualStudent?' selected':'')+'>'+esc(n)+'</option>'; }).join("")+'</select>';
-    if(manualStudent){ html+='<div class="grid-wrap" style="margin-top:10px"><table><thead><tr><th>Skill</th><th>Coached by</th><th>Passed off by</th></tr></thead><tbody>';
-      state.skills.forEach(function(sk){ var r=getR(manualStudent,sk); var ppl=["—"].concat(state.staff).concat(["Instructor","TA"]).concat(state.roster.filter(function(x){return x!==manualStudent;}));
-        html+='<tr><td><b>'+esc(sk)+'</b></td><td><select data-change="manual" data-student="'+esc(manualStudent)+'" data-skill="'+esc(sk)+'" data-f="coachedBy">'+optlist(ppl,r.coachedBy||"—")+'</select></td><td><select data-change="manual" data-student="'+esc(manualStudent)+'" data-skill="'+esc(sk)+'" data-f="passedOffBy">'+optlist(ppl,r.passedOffBy||"—")+'</select></td></tr>'; });
-      html+='</tbody></table></div>'; }
-    html+='</div>';
-    app.innerHTML=html;
-    requestAnimationFrame(function(){ Array.prototype.forEach.call(app.querySelectorAll(".pfill"),function(el){ el.style.width=(el.getAttribute("data-pct")||0)+"%"; }); });
-    var csv=document.getElementById("csvBtn"); if(csv) csv.addEventListener("click", exportCSV);
-  }
-
-  function exportCSV(){
-    var lines=[["Student","Skill","Status","CoachedBy","PassedOffBy","Date"]];
-    state.roster.forEach(function(n){ var rec=state.records[n]||{}; state.skills.forEach(function(sk){ var r=rec[sk], s=stageOf(r); lines.push([n,sk,s,(r&&r.coachedBy)||"",(r&&r.passedOffBy)||"",(r&&r.date)||""]); }); });
-    lines.push([]); lines.push(["Student","PassOffs","Coached","Proctored","CoachEC","ProctorEC","TotalEC"]);
-    state.roster.forEach(function(n){ var s=statsFor(n); lines.push([n,s.passOffs,s.coaching,s.proctoring,s.ecCoach,s.ecProctor,s.ec]); });
-    var csv=lines.map(function(row){ return row.map(function(c){ var v=String(c==null?"":c); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }).join(","); }).join("\n");
-    try{ var b=new Blob([csv],{type:"text/csv"}), u=URL.createObjectURL(b), a=document.createElement("a"); a.href=u; a.download="ce210_passoffs.csv"; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(u); a.remove(); },100); }
-    catch(e){ alert("Couldn't auto-download here — copy from the tables instead."); }
-  }
-
-  // ---------- setup ----------
-  function renderSetup(){
-    if(!gate()){ currentView="student"; setActive(); renderStudent(); return; }
-    var html='<div class="card"><h2>Class setup</h2>'+
-      '<label class="fld">Class title</label><input type="text" id="setTitle" value="'+esc(state.className)+'">'+
-      '<div class="row2"><div><label class="fld">Roster — one name per line</label><textarea id="setRoster">'+esc(state.roster.join("\n"))+'</textarea></div>'+
-      '<div><label class="fld">Skills / pass-offs — one per line</label><textarea id="setSkills">'+esc(state.skills.join("\n"))+'</textarea></div></div>'+
-      '<label class="fld">Staff (teachers / TAs) — one per line · selectable in “who are you,” can coach &amp; proctor, never on the leaderboard</label><textarea id="setStaff" style="min-height:64px">'+esc(state.staff.join("\n"))+'</textarea>'+
-      '<div class="row2"><div><label class="fld">Extra credit per person COACHED</label><input type="number" id="setECc" step="0.5" value="'+esc(state.config.ecPerCoach)+'"></div>'+
-      '<div><label class="fld">Extra credit per person PROCTORED</label><input type="number" id="setECp" step="0.5" value="'+esc(state.config.ecPerProctor)+'"></div>'+
-      '<div><label class="fld">Instructor code (optional — locks Dashboard &amp; Setup)</label><input type="text" id="setCode" value="'+esc(state.config.instructorCode)+'"></div></div>'+
-      '<div style="margin-top:16px"><button class="btn primary" id="saveSetup">Save setup</button> <button class="btn" id="clearRecs" style="margin-left:8px">Clear records (keep roster)</button> <button class="btn danger" id="eraseAll" style="margin-left:8px">Erase everything</button></div>'+
-      '<p class="muted" style="margin-top:10px">Storage mode: <b>'+(Store.mode()==="shared"?"shared (everyone with the link shares one dataset)":"local (this browser only)")+'</b>. Only students who have <b>passed off</b> a skill (plus Instructor / TA) appear as eligible coaches or proctors for it.</p></div>';
-    app.innerHTML=html;
-    document.getElementById("saveSetup").addEventListener("click", async function(){
-      state.className=document.getElementById("setTitle").value||state.className;
-      state.roster=document.getElementById("setRoster").value.split("\n").map(function(s){return s.trim();}).filter(Boolean);
-      state.skills=document.getElementById("setSkills").value.split("\n").map(function(s){return s.trim();}).filter(Boolean);
-      state.staff=document.getElementById("setStaff").value.split("\n").map(function(s){return s.trim();}).filter(Boolean);
-      state.config.ecPerCoach=parseFloat(document.getElementById("setECc").value)||0;
-      state.config.ecPerProctor=parseFloat(document.getElementById("setECp").value)||0;
-      state.config.instructorCode=document.getElementById("setCode").value.trim();
-      var raw=await Store.get(DATA_KEY); if(raw){ try{ var latest=ensureShape(JSON.parse(raw)); state.records=latest.records; }catch(e){} }
-      await saveAll(); document.getElementById("title").textContent=state.className; alert("Saved."); renderSetup();
-    });
-    document.getElementById("clearRecs").addEventListener("click", async function(){ if(confirm("Clear all pass-off records but KEEP the roster and skills?")){ state.records={}; await saveAll(); selectedStudent=""; manualStudent=""; renderSetup(); } });
-    document.getElementById("eraseAll").addEventListener("click", async function(){ if(confirm("Erase EVERYTHING (roster, skills, and records)?")){ state=ensureShape({}); await saveAll(); selectedStudent=""; manualStudent=""; renderSetup(); } });
-  }
-
-  function render(){ document.getElementById("title").textContent=state.className;
-    if(currentView==="student") renderStudent();
-    else if(currentView==="queues") renderQueues();
-    else if(currentView==="dashboard") renderDashboard();
-    else renderSetup();
-    pingCheck();
-  }
-  function setActive(){ Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(t){ t.classList.toggle("active", t.getAttribute("data-view")===currentView); }); }
-
-  // delegated events (attached once)
-  app.addEventListener("click", function(e){ ensureAudio(); var b=e.target.closest&&e.target.closest("[data-act]"); if(!b) return; var kind=b.getAttribute("data-act"), stu=b.getAttribute("data-student"), sk=b.getAttribute("data-skill"), who=""; var sel=b.getAttribute("data-sel"); if(sel){ var el=document.getElementById(sel); who=el?el.value:""; } else if(b.getAttribute("data-who")){ who=b.getAttribute("data-who"); } act(kind,stu,sk,who); });
-  app.addEventListener("change", function(e){ var el=e.target, ch=el.getAttribute&&el.getAttribute("data-change"); if(!ch) return;
-    if(ch==="whoami"){ selectedStudent=el.value; lastActiveSel=activeForStudent(selectedStudent); render(); }
-    else if(ch==="manualpick"){ manualStudent=el.value; render(); }
-    else if(ch==="manual"){ var stu=el.getAttribute("data-student"), sk=el.getAttribute("data-skill"), f=el.getAttribute("data-f"); var r=getR(stu,sk); r[f]=el.value; if(f==="passedOffBy"&&el.value!=="—"&&!r.date){ var d=new Date(); r.date=(d.getMonth()+1)+"/"+d.getDate(); } saveStudentRecord(stu).then(render); }
-  });
-  Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(t){ t.addEventListener("click",function(){ ensureAudio(); currentView=this.getAttribute("data-view"); setActive(); render(); }); });
-  document.getElementById("refreshBtn").addEventListener("click", async function(){ await loadAll(); render(); });
-  document.getElementById("soundBtn").addEventListener("click", function(){ soundOn=!soundOn; this.textContent="🔔 Sound: "+(soundOn?"on":"off"); ensureAudio(); if(soundOn) playPing(); });
-
-  // gentle live refresh for the coordination views
-  setInterval(async function(){ if(currentView!=="queues"&&currentView!=="student") return; var ae=document.activeElement; if(ae&&/^(SELECT|INPUT|TEXTAREA)$/.test(ae.tagName)) return; await loadAll(); render(); }, 9000);
-
-  (async function(){ var mb=document.getElementById("modebar"); await loadAll(); lastWait=waitingCount();
-    if(Store.mode()==="shared"){ mb.className="modebar mode-shared"; mb.innerHTML="<b>Shared mode:</b> everyone who opens this link sees and updates the same queues and data. (Name selection is honor-system — no passwords.)"; }
-    else { mb.className="modebar mode-local"; mb.innerHTML="<b>Local mode:</b> data is saved in <i>this browser only</i> — perfect as a single pass-off station. To sync across devices, run it as a shared link."; }
-    render();
-  })();
 })();
+
+/* ---------- dashboard ---------- */
+const chipsEl=document.getElementById("chips");
+ORDER.forEach(q=>{
+  const c=document.createElement("span"); c.className="chip"; c.id="chip_"+q;
+  c.innerHTML='<span class="ring"></span>'+QUESTS[q].code+" "+QUESTS[q].name+'<span class="mini"></span>';
+  chipsEl.appendChild(c);
+});
+function refreshDash(){
+  ORDER.forEach(q=>{
+    const el=document.getElementById("chip_"+q);
+    el.querySelector(".mini").style.width=(state.qprog[q]/5*100)+"%";
+    if(state.done.has(q)) el.classList.add("done");
+  });
+  const n=state.done.size;
+  document.getElementById("count").textContent=n+"/22 tests \u00b7 \ud83e\uddf0 "+state.gear.size+"/22 kits";
+  document.getElementById("pbar").style.width=(n/22*100)+"%";
+}
+function prog(q){ state.qprog[q]=Math.min(5,state.qprog[q]+1); refreshDash(); }
+function refreshInv(){
+  const el=document.getElementById("invitems"); el.innerHTML="";
+  if(state.inv.size===0){ el.innerHTML='<span style="font-size:11px;color:#4a5262">— empty — keep an eye out for glowing tools —</span>'; return; }
+  state.inv.forEach(id=>{ const t=TOOLS.find(t=>t.id===id);
+    const s=document.createElement("span"); s.className="item"; s.textContent="\ud83d\udd27 "+t.label; el.appendChild(s); });
+}
+refreshInv();
+
+/* ---------- audio ---------- */
+let AC=null;
+function beep(freq,dur,delay){ try{ AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+  const o=AC.createOscillator(), g=AC.createGain(); o.type="triangle"; o.frequency.value=freq;
+  g.gain.value=.05; o.connect(g); g.connect(AC.destination);
+  const t=AC.currentTime+(delay||0); o.start(t); g.gain.setValueAtTime(.05,t);
+  g.gain.exponentialRampToValueAtTime(.001,t+(dur||.1)); o.stop(t+(dur||.1)+.02);}catch(e){} }
+
+/* ---------- dialogue ---------- */
+const dlg=document.getElementById("dlg"), dName=document.getElementById("dlgname"),
+      dRole=document.getElementById("dlgrole"), dText=document.getElementById("dlgtext"),
+      dOpts=document.getElementById("dlgopts"), dNext=document.getElementById("dlgnext"),
+      pCtx=document.getElementById("portrait").getContext("2d");
+let script=[], scriptI=0, inDialogue=false, activeNPC=null, calcFocus=false;
+
+const ROLES={Randy:"Sampling & Splitting",Tina:"Moisture & Wash Bench",Sam:"Sieve Room",Fran:"Fracture Counts",
+ Gloria:"Specific Gravity Bench",Ernie:"Sand Equivalent",["Dr. Packer"]:"Soils Lab",Benny:"Asphalt Corner",
+ Chuck:"Concrete Sampling",Rosa:"Field QC",Slick:"Slump Station",Vern:"Density & Air",Pearl:"Cylinder Crew",
+ Gus:"Nuclear Gauge — Soils",Dot:"Sand Cone",Manny:"Nuclear Gauge — Asphalt",["Brother Smith"]:"Instructor \u2014 ask me anything"};
+
+function say(npc,steps){
+  inDialogue=true; script=steps; scriptI=0;
+  dName.textContent=npc.name; dRole.textContent=ROLES[npc.name]||"";
+  pCtx.imageSmoothingEnabled=true; pCtx.clearRect(0,0,52,60);
+  if(npc.icon){ pCtx.fillStyle='#1c2331'; pCtx.fillRect(0,0,52,60); pCtx.font='30px Segoe UI'; pCtx.textAlign='center'; pCtx.fillText(npc.icon,26,40);} else drawPerson(pCtx,26,34,npc.pal,{hat:npc.hat,glasses:npc.smith,tie:npc.smith});
+  dlg.style.display="block"; showStep();
+}
+function showStep(){
+  if(scriptI>=script.length){ closeDlg(); return; }
+  const s=script[scriptI]; dOpts.innerHTML=""; calcFocus=false;
+  if(s.fnText){ dText.textContent=s.fnText(); dNext.style.display="block"; }
+  else if(s.text!==undefined){ dText.textContent=s.text; dNext.style.display="block"; }
+  else if(s.links){
+    dText.textContent="\ud83d\udd17 Open in a new tab:"; dNext.style.display="block";
+    LINKS.forEach(l=>{ const a=document.createElement("a"); a.className="opt"; a.textContent=l.label;
+      a.href=l.url; a.target="_blank"; a.rel="noopener"; dOpts.appendChild(a); });
+  }
+  else if(s.menu){
+    dText.textContent=s.q; dNext.style.display="none";
+    s.menu.forEach(m=>{ const b=document.createElement("button"); b.className="opt"; b.textContent=m.label;
+      b.onclick=()=>{ const st = m.lazy? m.lazy() : m.steps; script.splice(scriptI+1,0,...st); scriptI++; showStep(); };
+      dOpts.appendChild(b); });
+  }
+  else if(s.bookLinks){
+    const q=s.bookLinks, L=TESTLINKS[q];
+    dText.textContent="\ud83d\udcd5 "+QUESTS[q].code+" \u2014 "+QUESTS[q].name+"\nOpen the official procedure or watch the demonstration:";
+    dNext.style.display="block";
+    [["\ud83d\udcc4 Procedure (WAQTC FOP PDF)",L.pdf],["\ud83c\udfa5 Demo video",L.video]].forEach(([lab,url])=>{
+      const a=document.createElement("a"); a.className="opt"; a.textContent=lab; a.href=url; a.target="_blank"; a.rel="noopener";
+      dOpts.appendChild(a); });
+  }
+  else if(s.equip){
+    const q=s.equip, spec=EQUIP[q]; dNext.style.display="none";
+    dText.textContent="\ud83e\uddf0 "+QUESTS[q].code+" \u2014 "+QUESTS[q].name+"\nSelect EVERY item this test needs \u2014 and nothing it doesn't \u2014 then CONFIRM.";
+    const items=[...spec.need,...spec.decoys];
+    for(let i=items.length-1;i>0;i--){ const j=(i*2654435761>>>3)%(i+1); [items[i],items[j]]=[items[j],items[i]]; }
+    const grid=document.createElement("div"); grid.className="eqgrid"; const sel=new Set();
+    items.forEach(it=>{ const b=document.createElement("button"); b.className="opt"; b.textContent=it;
+      b.onclick=()=>{ if(sel.has(it)){sel.delete(it); b.classList.remove("sel");} else {sel.add(it); b.classList.add("sel");} };
+      grid.appendChild(b); });
+    dOpts.appendChild(grid);
+    const row=document.createElement("div"); row.style.cssText="display:flex;justify-content:space-between;align-items:center;margin-top:8px;";
+    const msg=document.createElement("span"); msg.style.fontSize="13px";
+    const btn=document.createElement("button"); btn.id="calcbtn"; btn.textContent="CONFIRM KIT \u25b8";
+    btn.onclick=()=>{
+      const missing=spec.need.filter(n=>!sel.has(n)), extra=[...sel].filter(n=>!spec.need.includes(n));
+      if(missing.length===0 && extra.length===0){
+        msg.style.color="#c8f5da"; msg.textContent="\u2714 Perfect kit!"; beep(660,.09); beep(880,.12,.1);
+        if(!state.gear.has(q)){ state.gear.add(q); refreshDash(); toast("\ud83e\uddf0 Gear check passed: "+QUESTS[q].code+"  ("+state.gear.size+"/22)"); }
+        btn.disabled=true; setTimeout(()=>{ scriptI++; showStep(); },1200);
+      } else { state.wrongs++; beep(160,.15); msg.style.color="#f3b8b3";
+        msg.textContent="\u2718 "+(missing.length? missing.length+" required item(s) missing":"")+(missing.length&&extra.length?" \u00b7 ":"")+(extra.length? extra.length+" item(s) don't belong":"")+" \u2014 adjust and confirm again."; }
+    };
+    row.appendChild(msg); row.appendChild(btn); dOpts.appendChild(row);
+  }
+  else if(s.order){
+    const q=s.order, correct=ORDERQ[q]; dNext.style.display="none";
+    dText.textContent="\ud83d\udd00 The steps of "+QUESTS[q].code+" got shuffled. Drag them (or use \u25b2\u25bc) into the correct order, then CONFIRM.";
+    const listEl=document.createElement("div"); listEl.className="ordlist";
+    scrambled(correct).forEach(txt=>{
+      const row=document.createElement("div"); row.className="ordrow"; row.draggable=true;
+      row.innerHTML='<span class="grip">\u2261</span><span class="otxt"></span><span class="arrows"><button class="ab">\u25b2</button><button class="ab">\u25bc</button></span>';
+      row.querySelector(".otxt").textContent=txt;
+      const [up,down]=row.querySelectorAll(".ab");
+      up.onclick=e=>{e.stopPropagation(); if(row.previousElementSibling) listEl.insertBefore(row,row.previousElementSibling); renum();};
+      down.onclick=e=>{e.stopPropagation(); if(row.nextElementSibling) listEl.insertBefore(row.nextElementSibling,row); renum();};
+      row.addEventListener("dragstart",()=>{ row.classList.add("drag"); listEl._drag=row; });
+      row.addEventListener("dragend",()=>{ row.classList.remove("drag"); renum(); });
+      row.addEventListener("dragover",e=>{ e.preventDefault(); const d=listEl._drag; if(!d||d===row) return;
+        const r=row.getBoundingClientRect();
+        if(e.clientY < r.top+r.height/2) listEl.insertBefore(d,row); else listEl.insertBefore(d,row.nextSibling); });
+      listEl.appendChild(row);
+    });
+    function renum(){ [...listEl.children].forEach((r,i)=>{ r.querySelector(".grip").textContent=(i+1)+"."; }); }
+    dOpts.appendChild(listEl); renum();
+    const bar=document.createElement("div"); bar.style.cssText="display:flex;justify-content:space-between;align-items:center;margin-top:8px;";
+    const msg=document.createElement("span"); msg.style.fontSize="13px";
+    const btn=document.createElement("button"); btn.id="calcbtn"; btn.textContent="CONFIRM ORDER \u25b8";
+    let tries=0;
+    btn.onclick=()=>{
+      const now=[...listEl.children].map(r=>r.querySelector(".otxt").textContent);
+      const right=now.filter((t,i)=>t===correct[i]).length;
+      if(right===correct.length){
+        msg.style.color="#c8f5da"; msg.textContent="\u2714 Perfect sequence \u2014 that's the procedure."; beep(660,.09); beep(880,.12,.1);
+        [...listEl.children].forEach(r=>r.classList.add("ok"));
+        btn.disabled=true; if(s.pq) prog(s.pq);
+        setTimeout(()=>{ scriptI++; showStep(); },1200);
+      } else { tries++; state.wrongs++; beep(160,.15); msg.style.color="#f3b8b3";
+        msg.textContent="\u2718 "+right+" of "+correct.length+" steps are in the right position."+(tries>=2?" Hint: what MUST physically happen before anything else can?":"");
+        [...listEl.children].forEach((r,i)=>{ r.classList.toggle("okpos", r.querySelector(".otxt").textContent===correct[i]); });
+      }
+    };
+    bar.appendChild(msg); bar.appendChild(btn); dOpts.appendChild(bar);
+  }
+  else if(s.calc){
+    const c=s.calc; dNext.style.display="none";
+    dText.textContent="\ud83e\uddee "+c.prompt;
+    const box=document.createElement("div"); box.id="calcbox";
+    box.innerHTML='<div id="calceq">'+c.eq.replace(/\\%/g,"%").replace(/\{,\}/g,",").replace(/\\ /g," ").replace(/_\{([^}]*)\}/g,"<sub>$1</sub>").replace(/\\_/g,"_")+'</div>'
+     +'<div id="calcrow"><input id="calcin" type="text" inputmode="decimal" placeholder="your answer" autocomplete="off"><span id="calcunit">'+(c.unit||"")+'</span><button id="calcbtn">CHECK \u25b8</button></div><div id="calcmsg"></div>';
+    dOpts.appendChild(box);
+    const inp=box.querySelector("#calcin"), msg=box.querySelector("#calcmsg");
+    let tries=0;
+    inp.addEventListener("keydown",e=>{ e.stopPropagation(); if(e.key==="Enter") check(); });
+    inp.addEventListener("focus",()=>calcFocus=true); inp.addEventListener("blur",()=>calcFocus=false);
+    function check(){
+      const v=parseFloat(inp.value.replace(/,/g,""));
+      if(isNaN(v)){ msg.style.color="#f3b8b3"; msg.textContent="Type a number \u2014 the units are handled for you."; return; }
+      if(Math.abs(v-c.ans)<=c.tol+1e-9){
+        msg.style.color="#c8f5da"; msg.textContent="\u2714 "+c.fb; beep(660,.09); beep(880,.12,.1);
+        inp.disabled=true; box.querySelector("#calcbtn").disabled=true;
+        setTimeout(()=>{ scriptI++; showStep(); },1400);
+      } else {
+        tries++; state.wrongs++; beep(160,.15); msg.style.color="#f3b8b3";
+        msg.textContent = tries>=2 ? "\u2718 Not it. Plug the given numbers straight into the equation above \u2014 top of the fraction first, then divide. (Answer to "+(c.tol<0.01?"the exact value":"about "+c.tol)+"\u00a0"+(c.unit||"")+")" : "\u2718 Check your math and try again \u2014 the equation is right there.";
+      }
+    }
+    box.querySelector("#calcbtn").onclick=check;
+    setTimeout(()=>inp.focus(),80);
+  }
+  else if(s.opts){
+    dText.textContent=s.q; dNext.style.display="none";
+    s.opts.forEach((o,i)=>{
+      const b=document.createElement("button"); b.className="opt"; b.textContent=String.fromCharCode(65+i)+")  "+o;
+      b.onclick=()=>{
+        if(i===s.correct){ b.classList.add("good"); beep(660,.09); beep(880,.12,.1); if(s.pq) prog(s.pq);
+          setTimeout(()=>{ script.splice(scriptI+1,0,{text:"\u2714 "+s.why}); scriptI++; showStep(); },420);
+        } else { b.classList.add("bad"); beep(160,.15); state.wrongs++;
+          dText.textContent=s.q+"\n\n\u2718 "+s.wrong; setTimeout(()=>b.classList.remove("bad"),700); }
+      };
+      dOpts.appendChild(b);
+    });
+  } else if(s.fn){ s.fn(); scriptI++; showStep(); }
+}
+function advance(){ const s=script[scriptI]; if(s && (s.opts||s.menu||s.calc||s.equip||s.order)) return; scriptI++; showStep(); }
+dNext.onclick=advance;
+function closeDlg(){ inDialogue=false; dlg.style.display="none"; refreshDash(); checkWin(); }
+
+/* ---------- quest flow ---------- */
+function talkTo(npc){
+  activeNPC=npc;
+  if(npc.smith){ say(npc,smithSteps()); return; }
+  const pending = npc.quests.find(q=>!state.done.has(q));
+  if(!pending){
+    say(npc,[{text:npc.name+": All certified over here, inspector. Numbers leaving this station are clean. Go pester somebody else \u2014 nicely."}]);
+    return;
+  }
+  const Q=QUESTS[pending], st=state.qstage[pending];
+  if(st==="needtool"){
+    if(state.inv.has(Q.tool)){
+      state.inv.delete(Q.tool); state.given.add(Q.tool); refreshInv(); prog(pending);
+      const t=TOOLS.find(t=>t.id===Q.tool);
+      const X1=EXTRA[pending];
+      say(npc,[{text:"You hand over the "+t.label+"."},
+               ...Q.outro.map(t2=>({text:t2})),
+               {q:X1.q,opts:X1.opts,correct:X1.correct,why:X1.why,wrong:X1.wrong,pq:pending},
+               {order:pending,pq:pending},
+               {calc:Q.calc},
+               {fn:()=>{prog(pending); complete(pending);}}]);
+    } else {
+      const t=TOOLS.find(t=>t.id===Q.tool);
+      say(npc,[{text:npc.name+": Still need that "+t.label+", inspector. It's around here somewhere \u2014 look for the glow."}]);
+    }
+    return;
+  }
+  const steps=[...Q.intro.map(t=>({text:t})),
+    {q:Q.spot.q,opts:Q.spot.opts,correct:Q.spot.correct,why:Q.spot.why,wrong:Q.spot.wrong,pq:pending}];
+  if(Q.tool){
+    steps.push({text:Q.toolAsk});
+    if(state.inv.has(Q.tool)){
+      steps.push({fn:()=>{ state.inv.delete(Q.tool); state.given.add(Q.tool); refreshInv(); prog(pending); }});
+      steps.push({text:"You already have it! You hand over the "+TOOLS.find(t=>t.id===Q.tool).label+"."});
+      steps.push(...Q.outro.map(t=>({text:t})));
+      const X2=EXTRA[pending];
+      steps.push({q:X2.q,opts:X2.opts,correct:X2.correct,why:X2.why,wrong:X2.wrong,pq:pending});
+      steps.push({order:pending,pq:pending});
+      steps.push({calc:Q.calc});
+      steps.push({fn:()=>{prog(pending); complete(pending);}});
+    } else {
+      steps.push({fn:()=>{ state.qstage[pending]="needtool"; }});
+    }
+  } else {
+    steps.push({q:Q.fix.q,opts:Q.fix.opts,correct:Q.fix.correct,why:Q.fix.why,wrong:Q.fix.wrong,pq:pending});
+    steps.push(...Q.outro.map(t=>({text:t})));
+    const X3=EXTRA[pending];
+    steps.push({q:X3.q,opts:X3.opts,correct:X3.correct,why:X3.why,wrong:X3.wrong,pq:pending});
+    steps.push({order:pending,pq:pending});
+    steps.push({calc:Q.calc});
+    steps.push({fn:()=>{prog(pending); complete(pending);}});
+  }
+  say(npc,steps);
+}
+function complete(q){
+  state.done.add(q); state.qstage[q]="done"; state.qprog[q]=5; refreshDash();
+  toast("\ud83c\udfc5 "+QUESTS[q].code+" \u2014 "+QUESTS[q].name+" CERTIFIED  ("+state.done.size+"/22)");
+  beep(523,.1); beep(659,.1,.11); beep(784,.16,.22);
+}
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.style.display="block";
+  clearTimeout(t._h); t._h=setTimeout(()=>t.style.display="none",2600); }
+
+/* ---------- win ---------- */
+function checkWin(){
+  if(state.done.size<22) return;
+  setTimeout(()=>{
+    document.getElementById("winstats").innerHTML=
+      "Steps walked: "+state.steps+" &nbsp;\u00b7&nbsp; Wrong answers survived: "+state.wrongs+" &nbsp;\u00b7&nbsp; Tools recovered: "+state.given.size+" / 8 &nbsp;\u00b7&nbsp; Equipment kits mastered: "+state.gear.size+" / 22";
+    document.getElementById("wintext").innerHTML=
+      "Every sample honest. Every clock respected. Every calculation typed with your own hands. The gradations add up, the cylinders sit still, the gauge counts on its block, and the sand cone runs in silence.<br><br>Sixteen technicians just got better at their jobs because <b style='color:#f2c200'>you knew the procedures cold</b> \u2014 and Brother Smith saw the whole thing.<br><br><b style='color:#c8f5da'>Now go pass the real exam. You're ready.</b>";
+    document.getElementById("win").style.display="flex";
+    [523,659,784,1046].forEach((f,i)=>beep(f,.25,i*.16));
+  },900);
+}
+
+/* ---------- input ---------- */
+const keys={};
+addEventListener("keydown",e=>{
+  if(calcFocus) return;
+  if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].includes(e.key)) e.preventDefault();
+  keys[e.key.toLowerCase()]=true;
+  if((e.key===" "||e.key.toLowerCase()==="e")){
+    if(inDialogue){ advance(); }
+    else if(state.started){ tryInteract(); }
+  }
+});
+addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
+const LIB_SPOT  = {map:"lab", x:106, y:290};
+const CAGE_SPOT = {map:"lab", x:503, y:505};
+const CRIB_SPOT = {map:"site", x:120, y:372};
+function nearSpot(s){ return state.map===s.map && Math.hypot(s.x-state.px, s.y-state.py) < 72; }
+function tryInteract(){
+  const npc=nearestNPC(); if(npc){ talkTo(npc); return; }
+  if(nearSpot(LIB_SPOT)){ say({name:"Test Method Library",icon:"\ud83d\udcda",pal:[]}, libSteps()); return; }
+  if(nearSpot(CAGE_SPOT)||nearSpot(CRIB_SPOT)){ say({name:"Equipment Checkout",icon:"\ud83e\uddf0",pal:[]}, equipSteps()); return; }
+}
+function nearestNPC(){
+  let best=null,bd=64;
+  NPCS.forEach(n=>{ if(n.map!==state.map) return;
+    const d=Math.hypot(n.x-state.px,n.y-state.py); if(d<bd){bd=d;best=n;} });
+  return best;
+}
+
+/* ---------- movement ---------- */
+function rectHit(x,y,r){ return x>r.x-10 && x<r.x+r.w+10 && y>r.y-6 && y<r.y+r.h+16; }
+function update(){
+  if(!state.started||inDialogue) return;
+  let dx=0,dy=0,sp=3.1;
+  if(keys["w"]||keys["arrowup"])dy=-sp; if(keys["s"]||keys["arrowdown"])dy=sp;
+  if(keys["a"]||keys["arrowleft"])dx=-sp; if(keys["d"]||keys["arrowright"])dx=sp;
+  state.moving=(dx||dy);
+  if(state.moving) state.steps++;
+  let nx=state.px+dx, ny=state.py+dy;
+  nx=Math.max(24,Math.min(968,nx)); ny=Math.max(66,Math.min(524,ny));
+  let blocked=false;
+  solids().forEach(r=>{ if(rectHit(nx,ny,r)) blocked=true; });
+  NPCS.forEach(n=>{ if(n.map===state.map && Math.hypot(n.x-nx,n.y-ny)<26) blocked=true; });
+  const stuck = solids().some(r=>rectHit(state.px,state.py,r));   // never trap the player
+  if(!blocked || stuck){ state.px=nx; state.py=ny; }
+  TOOLS.forEach(t=>{
+    if(t.map!==state.map||state.inv.has(t.id)||state.given.has(t.id)) return;
+    if(Math.hypot(t.x-state.px,t.y-state.py)<26){
+      state.inv.add(t.id); refreshInv(); toast("\ud83d\udd27 Picked up: "+t.label); beep(880,.08); beep(1175,.1,.09);
+    }
+  });
+  const d=DOOR[state.map];
+  if(state.px>d.x-14&&state.px<d.x+d.w+14&&state.py>d.y-10&&state.py<d.y+d.h+10){
+    const to = state.map==="lab"?"site":"lab";
+    state.map=to;
+    if(to==="site"){ state.px=70; state.py=295; } else { state.px=920; state.py=440; }
+    toast(to==="site"?"\u2600 You step out to the JOBSITE":"\ud83c\udfe2 You head back into the LAB");
+    beep(330,.1);
+  }
+  const hn=nearestNPC(), h=document.getElementById("hint");
+  if(!hn && nearSpot(LIB_SPOT)){ h.style.display="block"; h.textContent="SPACE \u2014 browse the Test Method Library"; return; }
+  if(!hn && (nearSpot(CAGE_SPOT)||nearSpot(CRIB_SPOT))){ h.style.display="block"; h.textContent="SPACE \u2014 Equipment Checkout: build the right kit ("+state.gear.size+"/22)"; return; }
+  if(hn){ h.style.display="block";
+    if(hn.smith){ h.textContent="SPACE \u2014 ask Brother Smith for advice"; }
+    else{ const pend=hn.quests.find(q=>!state.done.has(q));
+      h.textContent = pend ? "SPACE \u2014 talk to "+hn.name+"  ("+QUESTS[pend].code+")" : hn.name+" is all set \u2713"; }
+  } else h.style.display="none";
+}
+
+/* ---------- render ---------- */
+function drawTruck(g,o){
+  const x=o.x,y=o.y;
+  g.fillStyle="#00000030"; g.beginPath(); g.ellipse(x+150,y+86,150,10,0,0,7); g.fill();
+  // chassis
+  g.fillStyle="#3a4048"; rr(g,x+8,y+58,284,14,4); g.fill();
+  // cab
+  g.fillStyle="#e8611c"; rr(g,x+8,y+18,64,48,8); g.fill();
+  g.fillStyle="#bcd7ee"; rr(g,x+16,y+26,40,18,4); g.fill();
+  g.fillStyle="#ffffff33"; rr(g,x+8,y+18,64,10,8); g.fill();
+  // drum
+  g.save(); g.translate(x+180,y+36);
+  g.fillStyle="#c9ced6"; g.beginPath(); g.ellipse(0,0,96,32,-0.06,0,7); g.fill();
+  g.fillStyle="#e8611c";
+  const rot=Date.now()/900;
+  for(let i=0;i<4;i++){ g.save(); g.rotate(-0.06);
+    const p=((rot+i/4)%1); const sx=-96+p*192;
+    g.beginPath(); g.ellipse(sx,0, 9, 30*Math.sqrt(Math.max(0,1-(sx/96)*(sx/96))) ,0,0,7); g.fill(); g.restore(); }
+  g.fillStyle="#9aa0aa"; g.beginPath(); g.ellipse(-96,0,12,30,-0.06,0,7); g.fill();
+  g.restore();
+  // chute
+  g.strokeStyle="#8a929b"; g.lineWidth=7; g.lineCap="round";
+  g.beginPath(); g.moveTo(x+276,y+44); g.lineTo(x+300,y+74); g.stroke();
+  // wheels
+  g.fillStyle="#1b1e24";
+  [[x+34,y+76],[x+150,y+76],[x+196,y+76],[x+250,y+76]].forEach(w=>{
+    g.beginPath(); g.arc(w[0],w[1],13,0,7); g.fill();
+    g.fillStyle="#5d6570"; g.beginPath(); g.arc(w[0],w[1],5,0,7); g.fill(); g.fillStyle="#1b1e24"; });
+  g.fillStyle="#e8e6df"; g.font="700 10px Segoe UI"; g.textAlign="center";
+  g.fillText("READY-MIX",x+150,y+8);
+}
+function drawFurn(g,o){
+  if(o.kind==="truck"){ drawTruck(g,o); return; }
+  g.fillStyle="#00000035"; rr(g,o.x+4,o.y+7,o.w,o.h,8); g.fill();
+  const grad=g.createLinearGradient(0,o.y,0,o.y+o.h);
+  grad.addColorStop(0,o.c); grad.addColorStop(1,shade(o.c,-24));
+  g.fillStyle=grad; rr(g,o.x,o.y,o.w,o.h,8); g.fill();
+  g.fillStyle="#ffffff20"; rr(g,o.x,o.y,o.w,7,8); g.fill();
+  // equipment vignettes
+  g.save(); g.translate(o.x,o.y);
+  if(o.kind==="oven"){ g.fillStyle="#2b2f36"; rr(g,14,12,40,36,4); g.fill();
+    g.fillStyle="#f2a53a"; rr(g,20,20,28,20,3); g.fill(); g.fillStyle="#ffd88a55"; rr(g,20,20,28,8,3); g.fill();
+    g.fillStyle="#3f5f72"; g.beginPath(); g.arc(90,30,16,0,7); g.fill(); g.fillStyle="#6fa8c9"; g.beginPath(); g.arc(90,28,12,0,7); g.fill(); }
+  if(o.kind==="sieve"){ for(let i=0;i<4;i++){ g.fillStyle=i%2?"#b7bdc6":"#9aa0aa";
+      rr(g,26,12+i*10,44,8,3); g.fill(); } g.fillStyle="#2b2f36"; rr(g,90,14,50,34,4); g.fill();
+    g.fillStyle="#f2c200"; g.beginPath(); g.arc(115,31,5+Math.sin(Date.now()/150)*1.2,0,7); g.fill(); }
+  if(o.kind==="bath"){ g.fillStyle="#173a4d"; rr(g,12,12,o.w-24,o.h-22,6); g.fill();
+    g.fillStyle="#3f8fbf"; rr(g,16,16,o.w-32,o.h-30,5); g.fill();
+    g.strokeStyle="#bfe4f7"; g.lineWidth=1.5; g.beginPath();
+    for(let x=20;x<o.w-20;x+=14) g.quadraticCurveTo(x+3.5,18+Math.sin(Date.now()/400+x)*2, x+7,20);
+    g.stroke(); }
+  if(o.kind==="cyl"){ for(let i=0;i<4;i++){ g.fillStyle="#dfe4ea"; rr(g,16+i*34,8,10,34,3); g.fill();
+      g.fillStyle="#b98a4a"; rr(g,16+i*34,26,10,10,2); g.fill(); } }
+  if(o.kind==="bins"){ for(let i=0;i<3;i++){ g.fillStyle=shade(o.c,-30); rr(g,12+i*56,10,48,40,5); g.fill();
+      g.fillStyle=["#8f857a","#a89a83","#7d7468"][i]; g.beginPath();
+      g.moveTo(14+i*56,44); g.quadraticCurveTo(36+i*56,10,58+i*56,44); g.closePath(); g.fill(); } }
+  if(o.kind==="form"){ g.strokeStyle="#5d4a2e"; g.lineWidth=5;
+    for(let i=0;i<4;i++){ g.strokeRect(10+i*42,10,36,o.h-20); } }
+  if(o.kind==="cure"){ for(let i=0;i<3;i++){ g.fillStyle="#cfd4da"; rr(g,10+i*44,8,36,24,4); g.fill();
+      g.fillStyle="#1c7a4d"; g.fillRect(14+i*44,12,8,4); } }
+  if(o.kind==="pad"){ g.fillStyle="#8f7648"; rr(g,8,8,o.w-16,o.h-16,6); g.fill();
+    g.fillStyle="#00000022"; for(let i=0;i<5;i++) g.fillRect(14+i*26,14,14,4); }
+  if(o.kind==="crib"){ g.fillStyle="#2b2f36"; rr(g,8,8,o.w-16,o.h-16,5); g.fill();
+    g.fillStyle="#f2c200"; g.fillRect(14,14,18,4); g.fillRect(40,14,10,4); g.fillRect(58,14,24,4); }
+  if(o.kind==="library"){
+    g.fillStyle="#4d3a22"; rr(g,6,6,o.w-12,o.h-12,4); g.fill();
+    const spines=["#b3261e","#1f5fb0","#1c7a4d","#b5731f","#6b4fa0","#2f6f6f","#c75300","#88521f"];
+    for(let row=0; row<3; row++){ let bx=12;
+      for(let i=0; bx<o.w-20; i++){ const bw=8+((i*7+row*3)%7);
+        g.fillStyle=spines[(i+row*3)%spines.length];
+        rr(g,bx,14+row*34,bw,26,1.5); g.fill();
+        g.fillStyle="#ffffff30"; g.fillRect(bx,14+row*34,bw,3); bx+=bw+3; }
+      g.fillStyle="#3a2c18"; g.fillRect(8,42+row*34,o.w-16,4); }
+  }
+  if(o.kind==="cage"){
+    g.fillStyle="#23262d"; rr(g,6,6,o.w-12,o.h-12,4); g.fill();
+    g.strokeStyle="#5d6570"; g.lineWidth=1;
+    for(let x=10;x<o.w-10;x+=8){ g.beginPath(); g.moveTo(x,8); g.lineTo(x+10,o.h-8); g.stroke();
+      g.beginPath(); g.moveTo(x+10,8); g.lineTo(x,o.h-8); g.stroke(); }
+    g.fillStyle="#f2c200"; g.font="16px Segoe UI"; g.textAlign="center"; g.fillText("\ud83e\uddf0",o.w/2,o.h/2+6);
+  }
+  g.restore();
+  if(o.label){ g.fillStyle="#f2f0e8"; g.font="700 10px Segoe UI"; g.textAlign="center";
+    g.shadowColor="#000"; g.shadowBlur=4;
+    g.fillText(o.label,o.x+o.w/2,o.y+o.h+14); g.shadowBlur=0; }
+}
+function shade(hex,amt){
+  const n=parseInt(hex.slice(1),16);
+  let r=(n>>16)+amt,g2=((n>>8)&255)+amt,b=(n&255)+amt;
+  r=Math.max(0,Math.min(255,r));g2=Math.max(0,Math.min(255,g2));b=Math.max(0,Math.min(255,b));
+  return "#"+((r<<16)|(g2<<8)|b).toString(16).padStart(6,"0");
+}
+
+function draw(){
+  const lab = state.map==="lab";
+  document.getElementById("locname").textContent = lab? "BENCH & BERM TESTING CO. \u2014 MAIN LAB":"HIGHWAY 20 JOBSITE \u2014 STATION 41+50";
+  if(lab){
+    const g=ctx.createLinearGradient(0,0,0,544); g.addColorStop(0,"#39404d"); g.addColorStop(1,"#2b303b");
+    ctx.fillStyle=g; ctx.fillRect(0,0,992,544);
+    ctx.strokeStyle="#ffffff08"; ctx.lineWidth=1;
+    for(let x=0;x<=992;x+=64){ ctx.beginPath(); ctx.moveTo(x,48); ctx.lineTo(x,544); ctx.stroke(); }
+    for(let y=48;y<=544;y+=64){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(992,y); ctx.stroke(); }
+    // wall
+    const w=ctx.createLinearGradient(0,0,0,52); w.addColorStop(0,"#4a5262"); w.addColorStop(1,"#39404d");
+    ctx.fillStyle=w; ctx.fillRect(0,0,992,52);
+    ctx.fillStyle="#9fc4e0"; for(let x=90;x<992;x+=220){ rr(ctx,x,8,90,32,5); ctx.fill();
+      ctx.fillStyle="#ffffff55"; ctx.fillRect(x+6,12,30,10); ctx.fillStyle="#9fc4e0"; }
+    ctx.fillStyle="#16191f30"; ctx.fillRect(0,50,992,4);
+  } else {
+    const sky=ctx.createLinearGradient(0,0,0,140); sky.addColorStop(0,"#7db6e8"); sky.addColorStop(1,"#c9dff0");
+    ctx.fillStyle=sky; ctx.fillRect(0,0,992,140);
+    ctx.fillStyle="#ffdf6b"; ctx.shadowColor="#ffdf6b"; ctx.shadowBlur=30;
+    ctx.beginPath(); ctx.arc(905,34,24,0,7); ctx.fill(); ctx.shadowBlur=0;
+    ctx.fillStyle="#ffffffbb";
+    [[140,30,46],[420,44,60],[700,26,40]].forEach(c=>{ ctx.beginPath();
+      ctx.ellipse(c[0],c[1],c[2],13,0,0,7); ctx.ellipse(c[0]+26,c[1]-8,c[2]*.6,11,0,0,7); ctx.fill(); });
+    const gr=ctx.createLinearGradient(0,120,0,544); gr.addColorStop(0,"#96835c"); gr.addColorStop(1,"#7a6845");
+    ctx.fillStyle=gr; ctx.fillRect(0,120,992,424);
+    ctx.fillStyle="#00000012"; for(let i=0;i<160;i++){ const x=(i*191)%992,y=130+(i*127)%400; ctx.beginPath(); ctx.ellipse(x,y,6,2.2,0,0,7); ctx.fill(); }
+    // fresh asphalt mat
+    const mat=ctx.createLinearGradient(0,496,0,544); mat.addColorStop(0,"#3a3d44"); mat.addColorStop(1,"#2c2f35");
+    ctx.fillStyle=mat; ctx.fillRect(0,496,992,48);
+    ctx.fillStyle="#f2c200"; for(let x=10;x<992;x+=62) rr(ctx,x,518,28,4,2), ctx.fill();
+    ctx.fillStyle="#ffffff14"; ctx.fillRect(0,496,992,5);
+  }
+  (lab?labFurniture():siteFurniture()).forEach(o=>drawFurn(ctx,o));
+  // door
+  const d=DOOR[state.map];
+  ctx.fillStyle="#00000035"; rr(ctx,d.x+3,d.y+4,d.w,d.h,6); ctx.fill();
+  const dg=ctx.createLinearGradient(0,d.y,0,d.y+d.h); dg.addColorStop(0,"#a5713a"); dg.addColorStop(1,"#7d5427");
+  ctx.fillStyle=dg; rr(ctx,d.x,d.y,d.w,d.h,6); ctx.fill();
+  ctx.fillStyle="#f2c200"; ctx.beginPath(); ctx.arc(d.x+(lab?8:d.w-8),d.y+d.h/2,3.5,0,7); ctx.fill();
+  ctx.fillStyle="#141925dd"; rr(ctx,d.x+d.w/2-34,d.y-26,68,18,9); ctx.fill();
+  ctx.fillStyle="#f2c200"; ctx.font="700 10px Segoe UI"; ctx.textAlign="center";
+  ctx.fillText(lab?"JOBSITE \u25b8":"\u25c2 LAB", d.x+d.w/2, d.y-13);
+  // tools — soft glow
+  TOOLS.forEach(t=>{
+    if(t.map!==state.map||state.inv.has(t.id)||state.given.has(t.id)) return;
+    const pulse=(Math.sin(Date.now()/300+t.x)+1)/2;
+    ctx.fillStyle="#f2c200"; ctx.shadowColor="#f2c200"; ctx.shadowBlur=12+pulse*14;
+    ctx.beginPath(); ctx.arc(t.x,t.y,7,0,7); ctx.fill(); ctx.shadowBlur=0;
+    ctx.fillStyle="#16191f"; ctx.font="10px Segoe UI"; ctx.textAlign="center"; ctx.fillText("\ud83d\udd27",t.x,t.y+3.5);
+  });
+  // NPCs
+  NPCS.forEach(n=>{
+    if(n.map!==state.map) return;
+    drawPerson(ctx,n.x,n.y,n.pal,{bob:1,hat:n.hat,glasses:n.smith,tie:n.smith});
+    ctx.textAlign="center"; ctx.font="700 14px Segoe UI";
+    if(n.smith){ ctx.fillStyle="#f2c200";
+      ctx.fillText("?", n.x, n.y-34-Math.abs(Math.sin(Date.now()/320))*4); }
+    else{
+      const pend=n.quests.find(q=>!state.done.has(q));
+      if(pend){ const need = state.qstage[pend]==="needtool";
+        ctx.fillStyle=need?"#f2c200":"#e8611c";
+        ctx.fillText(need?"\ud83d\udd27":"!", n.x, n.y-34-Math.abs(Math.sin(Date.now()/320))*4);
+      } else { ctx.fillStyle="#35c076"; ctx.fillText("\u2713", n.x, n.y-34); }
+    }
+    ctx.fillStyle="#141925cc"; const nw=ctx.measureText(n.name).width;
+    ctx.font="600 10px Segoe UI"; const nw2=ctx.measureText(n.name).width;
+    rr(ctx,n.x-nw2/2-6,n.y+28,nw2+12,14,7); ctx.fill();
+    ctx.fillStyle="#e8e6df"; ctx.fillText(n.name,n.x,n.y+38);
+  });
+  // player
+  const ppal = state.girl? ["#1c7a4d","#2e3238","#c88a5a","#5a3c1e"] : ["#1f5fb0","#3b3f46","#e8b48c","#3a2a10"];
+  drawPerson(ctx,state.px,state.py,ppal,{walk:state.moving,long:state.girl,hat:state.map==="site"});
+  ctx.fillStyle="#141925cc"; rr(ctx,state.px-16,state.py+28,32,14,7); ctx.fill();
+  ctx.fillStyle="#f2c200"; ctx.font="600 10px Segoe UI"; ctx.textAlign="center";
+  ctx.fillText("YOU",state.px,state.py+38);
+}
+function loop(){ update(); draw(); requestAnimationFrame(loop); }
+loop();
+
+/* ================= v3 DATA ================= */
+
+/* EDIT ME — per-test links: paste your Canvas/YouTube/WAQTC URLs over the # marks */
+const TESTLINKS = {
+ r90:{pdf:"#",video:"#"}, r76:{pdf:"#",video:"#"}, t255:{pdf:"#",video:"#"}, t11:{pdf:"#",video:"#"},
+ t27:{pdf:"#",video:"#"}, t335:{pdf:"#",video:"#"}, t85:{pdf:"#",video:"#"}, t176:{pdf:"#",video:"#"},
+ t99:{pdf:"#",video:"#"}, t272:{pdf:"#",video:"#"}, r75:{pdf:"#",video:"#"}, t209:{pdf:"#",video:"#"},
+ t166:{pdf:"#",video:"#"}, tm2:{pdf:"#",video:"#"}, t309:{pdf:"#",video:"#"}, t119:{pdf:"#",video:"#"},
+ t121:{pdf:"#",video:"#"}, t152:{pdf:"#",video:"#"}, r100:{pdf:"#",video:"#"}, t310:{pdf:"#",video:"#"},
+ t191:{pdf:"#",video:"#"}, t355:{pdf:"#",video:"#"},
+};
+
+/* fourth question per test — scenarios & edge cases */
+const EXTRA = {
+ r90:{q:"BONUS SCENARIO: Later, Randy needs a sample at the belt DISCHARGE (Method B). What's the technique?",
+  opts:["Hold a bucket under one edge of the stream","Pass the sampling device through the FULL stream at least twice — once in each direction — and combine","Wait for the belt to stop and scrape the end pulley","Sample only when the stream looks uniform"],
+  correct:1, why:"The full stream, both directions, at least twice — the stream segregates side-to-side, so a partial catch is a biased catch.",
+  wrong:"Part of the stream is not the stream. How do you catch ALL of it, fairly?"},
+ r76:{q:"BONUS SCENARIO: The fine aggregate arrives damp and clumps in the splitter chutes. What now?",
+  opts:["Force it through with a rod","Dry it in the oven first, always","Switch to quartering (or the miniature stockpile method) — damp fine aggregate doesn't flow honestly through a splitter","Add water until it pours"],
+  correct:2, why:"Damp fines hang up and split unevenly. Quartering and the miniature stockpile method are built exactly for this material.",
+  wrong:"When material won't free-flow, the splitter is the wrong tool — the FOP offers another path."},
+ t255:{q:"BONUS SCENARIO: Tina's sample comes out of the oven at constant mass and she reaches for the balance immediately. Problem?",
+  opts:["None — speed preserves accuracy","Hot samples must COOL first: heat waves and updrafts around a hot sample make the balance read unreliably (and can damage it)","She should weigh it while still in the oven","Hot samples weigh more, so subtract 1%"],
+  correct:1, why:"Cool before the dry weigh. A hot mass on a precision balance rides its own convection current — the reading floats.",
+  wrong:"Think about what hot air rising off the sample does to a sensitive balance pan."},
+ t11:{q:"BONUS SCENARIO: A hurried tech pours wash water off after just a gentle swirl — no vigorous agitation. Effect on the result?",
+  opts:["No effect — water finds all the fines","The fines never fully suspend, so less washes out and the No. 200 result reads LOW — contaminated aggregate passes as clean","The result reads high","The test finishes faster with the same answer"],
+  correct:1, why:"Agitation is what puts the clinging dust INTO the water. Skip it and the dirt stays hidden on the particles — an undercount that flatters dirty aggregate.",
+  wrong:"The wash only removes what agitation suspends. What happens to dust that never leaves the particle?"},
+ t27:{q:"BONUS SCENARIO: How does Sam PROVE the shaker ran long enough?",
+  opts:["The motor sounds done","Ten minutes is always sufficient","Thoroughness check: one additional minute of hand sieving passes not more than 0.5% of the sample mass through any individual sieve","The pan stops gaining visible dust"],
+  correct:2, why:"The 0.5%-in-one-minute hand check is the proof. Time on the dial is a guess; the check is evidence.",
+  wrong:"Neither sound nor minutes proves completion — there's a measurable criterion."},
+ t335:{q:"BONUS SCENARIO: The spec reads 'minimum 90% fracture on material retained on the No. 4.' Fran's sample includes everything down to dust. What does she test?",
+  opts:["The whole sample, dust and all","Only the fraction RETAINED on the No. 4 — fracture is defined and counted on the specified size fraction","Only the largest ten particles","The material passing the No. 4"],
+  correct:1, why:"Fracture requirements name their fraction. Sieve first, count the retained fraction — sand-size particles aren't part of this conversation.",
+  wrong:"Read the spec language again — which particles is it talking about?"},
+ t85:{q:"BONUS SCENARIO: A student skips shaking the basket, and air bubbles cling to the submerged rock. Which way does bulk SG move?",
+  opts:["Too HIGH — bubbles add mass","Too LOW — bubbles buoy the sample so C reads low, making (B − C) too large a volume","No change — bubbles are weightless","It depends on the water temperature"],
+  correct:1, why:"Bubbles are little life vests: C shrinks, the computed volume (B − C) grows, and the gravity divides by too much — reading low.",
+  wrong:"Follow the bubble through the math: what does buoyancy do to the submerged mass C?"},
+ t176:{q:"BONUS SCENARIO: During irrigation, Ernie yanks the tube out quickly once the level nears 15 in. What's the correct withdrawal?",
+  opts:["Fast is fine — the fines are already up","Withdraw SLOWLY while keeping the level AT the 15 in. mark — a fast pull disturbs the column and drops the level","Leave the tube in during settling","Withdraw, then top off with extra solution"],
+  correct:1, why:"Slow withdrawal, level held at 15 — the column you're about to read for 20 minutes gets built in that moment.",
+  wrong:"Everything after the shake is about NOT disturbing the column — including how the tube leaves."},
+ t99:{q:"BONUS SCENARIO: The soil for a Method A Proctor contains some gravel retained on the No. 4. What happens to it?",
+  opts:["Hammer it in with everything else","Method A uses MINUS No. 4 material — the retained fraction is sieved out and its percentage recorded (for oversize correction)","Crush it until it passes","Throw the whole sample out"],
+  correct:1, why:"Method A is a minus-No. 4 test. The oversize gets sieved off and counted, so the field comparison can be corrected for it.",
+  wrong:"Each method names its material. What does Method A compact — and what happens to the rest?"},
+ t272:{q:"BONUS SCENARIO: Why does the one-point procedure bother determining the OVERSIZE percentage?",
+  opts:["Paperwork tradition","The field soil contains coarse particles the mold test excluded — the oversize percentage feeds the correction that makes lab MDD and field density comparable","To calculate how much soil to discard","It sets the number of hammer blows"],
+  correct:1, why:"The field has rocks the mold didn't. The coarse-particle correction reconciles the two worlds so percent compaction is honest.",
+  wrong:"It's not clerical — it repairs a real mismatch between what the lab compacted and what the roller compacts."},
+ r75:{q:"BONUS SCENARIO: Dr. Packer's valid one-point plots neatly BETWEEN two curves of the family. What does he do?",
+  opts:["Pick the higher curve — safety factor","Pick the lower curve — conservative","Read MDD and OMC from an intermediate curve drawn through the point, paralleling the family's shape","Re-run until the point lands exactly on a curve"],
+  correct:2, why:"The family's nested shape lets you interpolate: sketch the in-between curve through your point, parallel to its neighbors, and read the peak.",
+  wrong:"The family is a pattern, not a menu — the point tells you where a curve of that same shape must run."},
+ t209:{q:"BONUS SCENARIO: Benny's loose mix is cold and won't separate by hand. The FOP allows warming — with what limit?",
+  opts:["Heat it until it smokes — hotter is faster","Warm it only enough to separate the clusters, and never fracture the aggregate breaking them apart","Freeze it instead — brittle clumps snap cleanly","Soak it in solvent overnight"],
+  correct:1, why:"Gentle warmth, gentle hands. Fractured aggregate creates fresh un-coated surfaces and changes the very mix you're measuring.",
+  wrong:"The mix has to stay the mix — what would crushing particles do to it?"},
+ t166:{q:"BONUS SCENARIO: A coarse, open specimen absorbs 3.2% water during the test. What does Method A say?",
+  opts:["Report it anyway with a note","Method A is only valid up to 2% absorption — past that, the specimen needs a sealing method (e.g., paraffin or vacuum-seal) instead","Subtract the absorbed water from B","Soak it longer until absorption stabilizes"],
+  correct:1, why:"Over 2% absorbed means water invaded the specimen and (B − C) no longer measures its true volume — switch to a sealed-specimen method.",
+  wrong:"There's a validity ceiling on Method A — and 3.2% is above it."},
+ tm2:{q:"BONUS SCENARIO: Chuck catches his sample in two portions, a few minutes apart. Before testing he must:",
+  opts:["Test each portion separately and average","Combine the portions and REMIX into one uniform sample","Use only the first portion","Add water to blend them"],
+  correct:1, why:"Portions become ONE sample — combined and remixed with a shovel — before any test touches it.",
+  wrong:"Two buckets aren't two samples; they're halves of one, once they're remixed."},
+ t309:{q:"BONUS SCENARIO: At 90 seconds, Rosa's thermometer is still climbing. What does she do?",
+  opts:["Read it at exactly 2:00 no matter what","Wait — read after a minimum of 2 minutes AND once the reading has stabilized, sensor still in the concrete","Pull it out and average two quick readings","Restart with colder concrete"],
+  correct:1, why:"Two minutes is the floor, not the finish line — a still-climbing needle isn't done telling the truth yet.",
+  wrong:"The clock and the needle BOTH have to be satisfied."},
+ t119:{q:"BONUS SCENARIO: Slick's slump specimen shears off sideways on the lift. The FOP says:",
+  opts:["Measure the taller side","Measure where it would have been","Disregard it and RETEST on a fresh portion — and if it shears twice, the concrete lacks the plasticity the slump test requires","Report zero slump"],
+  correct:2, why:"One shear: retest fresh. Two shears: that's a finding — the concrete isn't slump-testable, and that gets reported.",
+  wrong:"A sheared specimen isn't a measurement — but the FOP tells you exactly what it becomes."},
+ t121:{q:"BONUS SCENARIO: Rodding the second and third layers of the measure, the rod should penetrate:",
+  opts:["To the bottom of the bucket, every stroke","About 1 in. into the layer below — never forcibly striking the bottom","Only the top surface","Halfway through all layers combined"],
+  correct:1, why:"One inch into the layer beneath knits the layers together; punching the bottom damages the measure and over-consolidates.",
+  wrong:"The rod stitches layers together — it isn't a depth gauge to the floor."},
+ t152:{q:"BONUS SCENARIO: Reading taken, test done. What's the shutdown order before the lid comes off?",
+  opts:["Just unclamp — the reading released the pressure","Release/close the main air valve, then OPEN both petcocks to bleed the pressure, THEN unclamp the cover","Open the pump valve first","Flip the meter upside down to drain"],
+  correct:1, why:"Bleed through the petcocks before unclamping — popping a pressurized lid is how meters (and eyebrows) get ruined.",
+  wrong:"There's still pressure in that vessel — where does it go before the clamps open?"},
+ r100:{q:"BONUS SCENARIO: Pearl needs to identify each cylinder. Where does the ID go?",
+  opts:["Scratched into the fresh concrete surface","On the MOLD/cap (and the record), never carved into the fresh specimen — and IDs must match the field report exactly","On a sticky note under the mold","IDs are optional for 7-day breaks"],
+  correct:1, why:"Mark the mold and the paperwork, not the concrete. A carved top is a stress-raiser sitting right where the break happens.",
+  wrong:"These are legal specimens — identify them without wounding them."},
+ t310:{q:"BONUS SCENARIO: Why must the moisture used for dry density be verified by a method OTHER than the gauge itself?",
+  opts:["Regulation nostalgia","The neutron moisture reading can be fooled (bound water in some soils, hydrogen in organics) — an independent moisture check keeps the dry density honest","The gauge can't measure moisture at all","Oven moisture is faster"],
+  correct:1, why:"Neutrons count hydrogen, and hydrogen isn't always free water. The sealed sample and an independent moisture method are the reality check.",
+  wrong:"The gauge measures something CORRELATED with moisture — and correlations can be fooled."},
+ t191:{q:"BONUS SCENARIO: Dot's sand jar was calibrated last year, and the crew's been topping it off with sand from the pile out back. Problem?",
+  opts:["Sand is sand","The ENTIRE method rests on the calibrated density of THAT specific sand — mixing in foreign sand invalidates the calibration and every volume computed from it","Only a problem if the new sand is wet","Recalibration is only needed if the jar changes"],
+  correct:1, why:"The sand IS the instrument. New sand = new density = recalibrate, or every hole volume since is a guess.",
+  wrong:"What number converts sand mass into hole volume — and where did it come from?"},
+ t355:{q:"BONUS SCENARIO: The overlay Manny is testing is a thin 1.5-in. lift over old pavement. What's the concern in backscatter?",
+  opts:["None — backscatter only sees the surface dust","The gauge's measurement zone reaches into the OLD pavement below, biasing the reading — thin lifts need core correlation (and appropriate gauge settings) to be trusted","Thin lifts read too hot","Backscatter doesn't work on asphalt"],
+  correct:1, why:"Backscatter sees a few inches deep — deeper than a thin lift. The underlying layer contaminates the count, which is exactly what core correlation corrects.",
+  wrong:"Think about how deep those gamma paths travel versus how thick the new mat is."},
+};
+
+/* equipment kits: required items + decoys (from other tests) */
+const EQUIP = {
+ r90:{need:["Square-point shovel","Sample containers & ID tags","Belt sampling template","Front-end loader (stockpiles)"],
+      decoys:["Slump cone","Vacuum pump","Weighted foot assembly","Nuclear gauge"]},
+ r76:{need:["Riffle splitter & pans","Canvas tarp","Flat-edged trowel or shovel","Balance or scale"],
+      decoys:["5.5-lb Proctor rammer","Irrigator tube","Cylinder molds","Pressure meter"]},
+ t255:{need:["Balance (0.1 g)","Drying oven / hot plate / microwave","Sample containers","Heat-resistant gloves & stirring tool"],
+      decoys:["Sand-cone jar","Slump cone","No. 200 sieve","Vacuum vessel lid"]},
+ t11:{need:["No. 200 (75 µm) sieve","Coarser guard sieve (e.g., No. 10)","Wash container","Drying oven & balance (0.1 g)"],
+      decoys:["Riffle splitter","Proctor mold","Air meter","Weighted foot assembly"]},
+ t27:{need:["Nest of sieves with pan & lid","Mechanical sieve shaker","Balance (0.1 g)","Sieve brushes"],
+      decoys:["Vacuum pump","Slump cone","Base plate","Calibrated sand"]},
+ t335:{need:["Specified sieve for the fraction","Balance (0.1 g)","Sorting trays (3)","Good task lighting"],
+      decoys:["Mechanical shaker","Water bath","Nuclear gauge","Graduated cylinder"]},
+ t85:{need:["Wire basket & water tank","Absorbent towel","Balance with suspension hook","Drying oven"],
+      decoys:["Riffle splitter","Sand-cone apparatus","Air meter mallet","Belt template"]},
+ t176:{need:["Graduated plastic cylinder & stopper","Working solution, siphon & irrigator tube","Weighted foot assembly","Tin measure & funnel","Timer"],
+      decoys:["5/8-in tamping rod","Wire basket","Proctor collar","Sieve brushes"]},
+ t99:{need:["Proctor mold with collar","5.5-lb rammer (12-in drop)","Straightedge","Balance & moisture tins","Sample extruder"],
+      decoys:["Slump cone","Vacuum vessel","No. 200 sieve","Weighted foot assembly"]},
+ t272:{need:["Proctor mold with collar","5.5-lb rammer (12-in drop)","Family of curves chart","Balance & moisture tins"],
+      decoys:["Air meter","Wire basket","Sand-cone jar","Irrigator tube"]},
+ r75:{need:["Several full T 99 curves (same source)","Moisture–density graph sheet","Similar-soil classification data","Straightedge / french curve"],
+      decoys:["Nuclear gauge","Slump cone","Riffle splitter","Vacuum pump"]},
+ t209:{need:["Vacuum pump with gauge/manometer","Sealed vacuum vessel & lid","Balance (0.1 g)","25°C water supply","Timer"],
+      decoys:["Proctor rammer","Weighted foot assembly","Belt template","Cylinder caps"]},
+ t166:{need:["25 ± 1°C water bath","Balance with suspension apparatus","Damp towel","Timer"],
+      decoys:["Vacuum pump","Sieve shaker","Sand-cone base plate","5.5-lb rammer"]},
+ tm2:{need:["Dampened receptacle / wheelbarrow","Square shovel (remixing)","Watch or timer","Evaporation cover (wet burlap/plastic)"],
+      decoys:["Wire basket","No. 200 sieve","Family of curves chart","Vacuum vessel lid"]},
+ t309:{need:["Calibrated thermometer (±1°F)","Container giving 3-in cover all around","Watch or timer"],
+      decoys:["5/8-in tamping rod","Mallet","Strike-off plate","Sieve brushes","Infrared camera"]},
+ t119:{need:["Slump cone with foot pieces","5/8-in hemispherical tamping rod","Tape or ruler (¼-in graduations)","Flat, rigid, dampened base","Watch (2½-min limit)"],
+      decoys:["Mallet","Vacuum pump","Wire basket","Sand-cone jar"]},
+ t121:{need:["Calibrated measure (known volume)","5/8-in rod & rubber mallet","Flat strike-off plate","Scale (0.1 lb)"],
+      decoys:["Slump cone","Irrigator tube","Proctor collar","No. 200 sieve"]},
+ t152:{need:["Type B pressure meter (bowl, lid, pump)","5/8-in rod & rubber mallet","Syringe/water for petcocks","Strike-off bar or plate","Aggregate correction factor card"],
+      decoys:["Wire basket","Belt template","Moisture tins","Family of curves chart"]},
+ r100:{need:["4×8 single-use cylinder molds","3/8-in tamping rod","Rubber mallet (or open hand for plastic)","Non-absorptive caps or plates","Level, rigid curing platform"],
+      decoys:["Slump cone base","Vacuum pump","Sieve shaker","Weighted foot assembly"]},
+ t310:{need:["Nuclear gauge with source rod","Reference standard block","Drive pin, guide & extraction tool","Sealed sample container & balance","Transport case, log & badge"],
+      decoys:["Slump cone","Riffle splitter","25°C water bath","Strike-off plate"]},
+ t191:{need:["Sand-cone apparatus (jar, cone, valve)","Calibrated density sand","Base plate","Digging tools & sealed soil container","Balance"],
+      decoys:["Nuclear gauge","5/8-in rod","Sieve brushes","Air meter"]},
+ t355:{need:["Nuclear gauge (backscatter capable)","Reference standard block","Fine filler & straightedge","Marking keel/crayon (footprint)"],
+      decoys:["Drive pin & guide","Sand-cone jar","Slump cone","Proctor mold"]},
+};
+
+/* ---------- library & equipment dialogues ---------- */
+const UNITS = [
+ ["\ud83e\udea8 Aggregates shelf", ["r90","r76","t255","t11","t27","t335","t85","t176"]],
+ ["\u26f0 Soils shelf",           ["t99","t272","r75","t310","t191"]],
+ ["\ud83d\udee3 Asphalt shelf",   ["t209","t166","t355"]],
+ ["\ud83e\uddf1 Concrete shelf",  ["tm2","t309","t119","t121","t152","r100"]],
+];
+function libSteps(){
+ return [{q:"Rows of well-worn WAQTC binders and field manuals. Which shelf?",
+  menu:[
+   ...UNITS.map(([label,qs])=>({label:label,lazy:()=>[
+     {q:"Pick a method:",menu:[
+       ...qs.map(q=>({label:"\ud83d\udcd5 "+QUESTS[q].code+" \u2014 "+QUESTS[q].name,
+         lazy:()=>[{bookLinks:q},{q:"Anything else?",menu:[
+           {label:"\ud83d\udcda Back to the shelves",lazy:()=>libSteps()},
+           {label:"\u2b05 Done reading",steps:[]}]}]})),
+       {label:"\u2b05 Back",lazy:()=>libSteps()},
+     ]}]})),
+   {label:"\u2b05 Leave the library",steps:[]},
+  ]}];
+}
+function equipSteps(){
+ const remaining = ORDER.filter(q=>!state.gear.has(q));
+ if(remaining.length===0)
+   return [{text:"\ud83e\uddf0 Equipment Checkout: every kit mastered \u2014 22 for 22. You could pack for any test blindfolded. (Please don't test blindfolded.)"}];
+ return [{q:"\ud83e\uddf0 Equipment Checkout \u2014 pull the right kit for a test. ("+state.gear.size+"/22 mastered) Which test?",
+  menu:[
+   ...remaining.slice(0,8).map(q=>({label:QUESTS[q].code+" \u2014 "+QUESTS[q].name,
+     lazy:()=>[{equip:q},{q:"Nice work. Another kit?",menu:[
+       {label:"\ud83e\uddf0 Pick another test",lazy:()=>equipSteps()},
+       {label:"\u2b05 Done for now",steps:[]}]}]})),
+   ...(remaining.length>8? [{label:"\u2026complete these first \u2014 the list refreshes as you master kits",steps:[{text:"The checkout window shows eight kits at a time. Master a few and more appear."}]}]:[]),
+   {label:"\u2b05 Leave the checkout",steps:[]},
+  ]}];
+}
+
+/* correct procedure order per test — scrambled for the player */
+const ORDERQ = {
+ r90:["Discard the FIRST loader bucketful","Take a full bucket and roll out a small pile","Back-drag the pile flat","Shovel one vertical increment from each quadrant","Combine, mix, and tag the sample"],
+ r76:["Mix the sample by turning it over 4 times","Form a cone without losing material","Flatten to uniform thickness (diameter 4\u20138\u00d7)","Cut into four equal quarters","Keep two DIAGONALLY OPPOSITE quarters, fines included","Repeat until test size is reached"],
+ t255:["Weigh the empty container","Weigh container + WET sample","Dry with a suitable heat source","Heat the additional time (oven 30 / micro 2 / other 10 min)","Verify constant mass \u2014 change < 0.10%","Cool, weigh dry, compute w = water \u00f7 DRY \u00d7 100"],
+ t11:["Dry to constant mass; record the ORIGINAL dry mass","Cover with water; agitate vigorously","Decant wash water through guard + No. 200 sieves","Repeat until the wash water runs clear","Return the sieve catch; re-dry to constant mass","Compute % passing No. 200 on the original mass"],
+ t27:["Stack sieves \u2014 largest opening on top, pan below","Load the washed, dried sample","Run the verified mechanical shaker","Weigh each sieve's catch (brush stuck particles free)","Check-sum: totals within 0.3% or invalid","Compute and report the percentages"],
+ t335:["Sieve to the specified fraction and reduce","Examine each particle against the 25% rule","Sort into Fractured / Questionable / Unfractured","Re-sort the Q pile if it exceeds 15%","Weigh each pile to 0.1 g","Compute %F = (F + Q/2) \u00f7 total \u00d7 100"],
+ t85:["Wash, then soak 15\u201319 hours","Towel to SSD \u2014 damp, not shiny","Weigh SSD in air = B","Weigh submerged, bubbles shaken free = C","Oven-dry, cool, weigh = A","Compute Gsb = A \u00f7 (B \u2212 C) and absorption"],
+ t176:["Siphon solution into the cylinder to 4 \u00b1 0.1 in.","Funnel in the measured sample; tap out air bubbles","Let it soak 10 \u00b1 1 minutes","Shake \u2014 mechanical 45 \u00b1 1 s","Irrigate to the 15 in. mark; withdraw slowly","Settle 20 min \u00b1 15 s; read clay, then sand"],
+ t99:["Prepare minus-No. 4 material; moisten the first point","Compact 3 layers \u00d7 25 blows (5.5 lb, 12 in.)","Remove the collar; trim flush with the straightedge","Weigh mold + soil; compute wet density","Slice the specimen; moisture sample from ALL layers","Repeat wetter; plot the curve; read MDD & OMC"],
+ t272:["Compact ONE point exactly per T 99","Compute the wet density","Determine moisture content and dry density","Plot the point on the family of curves","Check the validity gates (80\u2013100% OMC; 2 lb/ft\u00b3)","Read MDD and OMC from the matching curve"],
+ r75:["Run full Proctors on similar soils from one source","Plot the curves together on one sheet","Verify they nest with one characteristic shape","Adopt the family for that source","Use one-points against it \u2014 inside the gates","Rebuild the family when the source changes"],
+ t209:["Separate the loose mix \u2014 clusters under \u00bc in.","Cool; weigh the dry sample = A","Cover with 25\u00b0C water; seal the vacuum lid","Vacuum 30 \u00b1 5 mmHg for 15 \u00b1 1 min, agitating","Release the vacuum gently","Weigh submerged (or flask); compute Gmm"],
+ t166:["Weigh the dry specimen in air = A","Tare the balance with the suspension submerged","Soak 4 \u00b1 1 min; weigh submerged = C","Surface-dry with a damp towel within 5 s","Weigh SSD = B \u2014 inside 15 s total","Compute Gmb; verify absorption \u2264 2%"],
+ tm2:["Dampen the receptacle; dump excess water","Let \u00bd yd\u00b3 discharge first","Pass through the ENTIRE stream \u2014 2+ portions","Combine the portions and remix","Protect from evaporation and contamination","Start tests within 5 min; cylinders within 15"],
+ t309:["Get a sample big enough for 3 in. of cover","Immerse the sensor with 3 in. all around","Gently press concrete around the stem","Wait \u2265 2 min \u2014 or until the reading is stable","Read while the sensor is STILL in the concrete","Record to 1\u00b0F \u2014 all within 5 min of sampling"],
+ t119:["Dampen mold and base; stand on the foot pieces","Fill 1/3 by volume; rod 25\u00d7 full depth","Fill 2/3; rod 25\u00d7, 1 in. into the layer below","Overfill; rod 25\u00d7; strike off with the rod","Clear the base; lift 12 in. straight up in 5 \u00b1 2 s","Measure to the displaced ORIGINAL center, \u00bc in."],
+ t121:["Weigh the dampened empty measure","Fill in three rodded layers (25\u00d7 each)","Tap the sides 10\u201315\u00d7 after each layer","Strike off \u2014 two passes with a sawing motion","Clean every bit of concrete off the exterior","Weigh full; density = net \u00f7 volume"],
+ t152:["Fill, rod, and tap the bowl; strike off flush","Clamp on the cleaned, moistened lid","Inject water in one petcock until it streams out the other","Pump just PAST the initial line; stabilize; adjust back","Close petcocks; open the valve; mallet and read","Bleed the pressure; subtract the ACF; record"],
+ r100:["Set molds on a level, rigid spot beside the cure location","Begin molding within 15 minutes of sampling","Fill half; rod 25\u00d7; tap the sides 10\u201315\u00d7","Slightly overfill; rod 25\u00d7; tap; strike off","Cap immediately \u2014 non-absorptive cover","Initial cure 60\u201380\u00b0F, undisturbed \u2265 8 h after set"],
+ t310:["Warm up 10\u201320 min; take the standard count","Choose a clear site (30 ft / 10 ft / 6 in. rules)","Prep the surface; drive the hole 2 in. DEEPER than the rod","Seat the gauge; pull back so the rod bears on the hole wall","Take two 1-min counts \u2014 agree within 2.0 pcf","Seal a 9-lb sample; compute dry density and %C"],
+ t191:["Verify the sand calibration and cone correction","Seat the base plate; dig; save EVERY crumb sealed","Weigh the wet soil from the hole","Run the sand \u2014 everything vibration-free","Hole volume = sand in hole \u00f7 sand density","Wet density \u2192 dry density \u2192 percent compaction"],
+ t355:["Warm up; take the standard count","Spread filler thin; strike off the excess","Seat the gauge; MARK the footprint","Backscatter count #1 (one minute)","Rotate 90\u00b0; reseat on the mark; count #2","Within 2.5 pcf? average & compute %C \u2014 else retest"],
+};
+function scrambled(list){
+  // deterministic scramble guaranteed different from the answer
+  const idx=list.map((_,i)=>i);
+  for(let i=idx.length-1;i>0;i--){ const j=(i*2654435761>>>4)%(i+1); [idx[i],idx[j]]=[idx[j],idx[i]]; }
+  if(idx.every((v,i)=>v===i)){ idx.push(idx.shift()); }
+  return idx.map(i=>list[i]);
+}
+
 </script>
 </body>
 </html>
